@@ -1,0 +1,43 @@
+{
+  "name": "@tc/md-vue",
+  "version": "0.1.0",
+  "description": "基于 @tc/md-core 的 Vue 3 Markdown 渲染组件",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@tc/md-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": ">=3.3.0"
+  },
+  "devDependencies": {
+    "vue": "^3.4.0"
+  },
+  "keywords": [
+    "markdown",
+    "vue",
+    "vue3",
+    "component",
+    "unified"
+  ],
+  "license": "MIT"
+}

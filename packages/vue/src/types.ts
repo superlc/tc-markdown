@@ -1,0 +1,65 @@
+import type { Component } from 'vue';
+import type { ProcessorOptions } from '@tc/md-core';
+
+// 从 core 重新导出
+export type { PluginConfig } from '@tc/md-core';
+
+/**
+ * 自定义组件映射表
+ * 可用于覆盖默认 HTML 元素的渲染方式
+ */
+export interface MarkdownComponents {
+  /** 标题 h1-h6 */
+  h1?: Component;
+  h2?: Component;
+  h3?: Component;
+  h4?: Component;
+  h5?: Component;
+  h6?: Component;
+  /** 段落 */
+  p?: Component;
+  /** 链接 */
+  a?: Component;
+  /** 图片 */
+  img?: Component;
+  /** 代码块 */
+  pre?: Component;
+  code?: Component;
+  /** 列表 */
+  ul?: Component;
+  ol?: Component;
+  li?: Component;
+  /** 引用 */
+  blockquote?: Component;
+  /** 表格 */
+  table?: Component;
+  thead?: Component;
+  tbody?: Component;
+  tr?: Component;
+  th?: Component;
+  td?: Component;
+  /** 水平线 */
+  hr?: Component;
+  /** 其他自定义元素 */
+  [key: string]: Component | undefined;
+}
+
+/**
+ * Markdown 组件 Props
+ */
+export interface MarkdownProps extends ProcessorOptions {
+  /** Markdown 源文本 */
+  content: string;
+  /** 自定义组件映射 */
+  components?: MarkdownComponents;
+  /** 容器 class */
+  class?: string;
+}
+
+/**
+ * useMarkdown Composable 配置
+ */
+export interface UseMarkdownOptions extends ProcessorOptions {
+  /** 自定义组件映射 */
+  components?: MarkdownComponents;
+}
