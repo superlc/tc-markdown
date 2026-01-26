@@ -1,5 +1,6 @@
 import type { Root, Element } from 'hast';
 import type { ProcessorOptions } from '../types';
+import type { InlineType } from '../inline-prediction';
 
 /**
  * 块信息
@@ -67,6 +68,15 @@ export interface ParserStats {
 export interface StreamingParserOptions extends ProcessorOptions {
   /** 是否启用块缓存，默认 true */
   enableCache?: boolean;
+  /** 是否启用行内预测，默认 true */
+  enableInlinePrediction?: boolean;
+  /** 预测的行内标记类型，默认全部 */
+  predictedInlineTypes?: InlineType[];
+  /**
+   * 是否缓冲（暂不显示）不确定的块级前缀，默认 true。
+   * 典型场景：流式输出刚好停在列表前缀 "-" / "1." 时，避免先显示前缀后又变成列表导致闪现。
+   */
+  bufferUncertainPrefixes?: boolean;
 }
 
 /**

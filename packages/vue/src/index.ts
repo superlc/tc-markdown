@@ -30,6 +30,8 @@ export type {
   OutputRatePreset,
   OutputRateCustom,
   OutputRateStatus,
+  InlineType,
+  InlinePredictionOptions,
 } from '@tc/md-core';
 
 /**

@@ -5,6 +5,7 @@ import {
   useStreamingMarkdown,
   type BlockInfo,
   type OutputRatePreset,
+  type InlineType,
 } from '@tc/md-react';
 import './styles.css';
 
@@ -419,6 +420,140 @@ export const CustomRate: Story = {
             className="markdown-body"
           />
         </div>
+      </div>
+    );
+  },
+};
+
+// 用于行内预测演示的内容
+const inlinePredictionContent = `这是一段包含各种**行内标记的文本。
+
+这里有*斜体文字*，也有**粗体文字**，还有\`行内代码\`。
+
+这是一个[链接示例](https://example.com)，以及~~删除线文本~~。
+
+组合使用：**粗体中包含*斜体*文字**，或者\`代码中的内容\`。
+
+更多链接：访问[腾讯云](https://cloud.tencent.com)获取更多信息。
+`;
+
+/**
+ * 行内预测演示 - 开启 vs 关闭对比
+ */
+export const InlinePrediction: Story = {
+  render: () => {
+    const [key, setKey] = useState(0);
+
+    return (
+      <div className="streaming-demo">
+        <div className="controls">
+          <button onClick={() => setKey((k) => k + 1)}>同时重新开始</button>
+          <span className="status">对比：开启预测 vs 关闭预测</span>
+        </div>
+
+        <p style={{ margin: '16px 0', color: '#666', fontSize: '14px' }}>
+          观察未闭合标记（如 <code>**粗体</code>、<code>*斜体</code>、<code>`代码</code>）的渲染差异。
+          开启预测时，未闭合的标记会预渲染为目标格式（带 <code>data-predicted</code> 属性）。
+        </p>
+
+        <div className="comparison-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="comparison-item">
+            <h4>✅ 开启行内预测 (默认)</h4>
+            <StreamingMarkdown
+              key={`prediction-on-${key}`}
+              source={inlinePredictionContent}
+              outputRate="slow"
+              enableInlinePrediction={true}
+              className="markdown-body"
+            />
+          </div>
+
+          <div className="comparison-item">
+            <h4>❌ 关闭行内预测</h4>
+            <StreamingMarkdown
+              key={`prediction-off-${key}`}
+              source={inlinePredictionContent}
+              outputRate="slow"
+              enableInlinePrediction={false}
+              className="markdown-body"
+            />
+          </div>
+        </div>
+
+        <style>{`
+          [data-predicted="true"] {
+            opacity: 0.7;
+            text-decoration-line: underline;
+            text-decoration-style: dashed;
+            text-underline-offset: 2px;
+          }
+        `}</style>
+      </div>
+    );
+  },
+};
+
+/**
+ * 行内预测类型选择
+ */
+export const InlinePredictionTypes: Story = {
+  render: () => {
+    const [key, setKey] = useState(0);
+    const [enabledTypes, setEnabledTypes] = useState<InlineType[]>([
+      'bold',
+      'italic',
+      'code',
+      'strikethrough',
+      'link',
+    ]);
+
+    const allTypes: InlineType[] = ['bold', 'italic', 'code', 'strikethrough', 'link', 'image'];
+
+    const toggleType = (type: InlineType) => {
+      setEnabledTypes((prev) =>
+        prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      );
+    };
+
+    return (
+      <div className="streaming-demo">
+        <div className="controls" style={{ flexWrap: 'wrap', gap: '8px' }}>
+          {allTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => toggleType(type)}
+              className={enabledTypes.includes(type) ? 'active' : ''}
+              style={{ textTransform: 'capitalize' }}
+            >
+              {type}
+            </button>
+          ))}
+          <button onClick={() => setKey((k) => k + 1)}>重新开始</button>
+        </div>
+
+        <p style={{ margin: '16px 0', color: '#666', fontSize: '14px' }}>
+          选择要启用预测的行内标记类型。未选中的类型将保持原有行为（先显示标记文本，闭合后变为格式）。
+        </p>
+
+        <div className="content-area">
+          <StreamingMarkdown
+            key={key}
+            source={inlinePredictionContent}
+            outputRate="slow"
+            enableInlinePrediction={true}
+            predictedInlineTypes={enabledTypes}
+            className="markdown-body"
+          />
+        </div>
+
+        <style>{`
+          [data-predicted="true"] {
+            opacity: 0.7;
+            text-decoration-line: underline;
+            text-decoration-style: dashed;
+            text-underline-offset: 2px;
+          }
+        `}</style>
       </div>
     );
   },

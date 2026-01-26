@@ -27,3 +27,12 @@ export type {
   OutputRateCustom,
   OutputRateStatus,
 } from './output-rate';
+
+// 行内预测补全
+export { InlineCompleter, DEFAULT_INLINE_TYPES } from './inline-prediction';
+export type {
+  InlineType,
+  Completion,
+  CompletionResult,
+  InlinePredictionOptions,
+} from './inline-prediction';

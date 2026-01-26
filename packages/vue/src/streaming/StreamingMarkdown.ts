@@ -159,10 +159,12 @@ export const StreamingMarkdown = defineComponent({
 
             controller.start(
               newSource,
-              (_chunk, accumulated) => {
-                parser.reset();
-                parser.append(accumulated);
-                prevContent.value = accumulated;
+              (chunk) => {
+                // 增量追加，避免每个 chunk 都 reset 导致整树重建闪烁
+                if (chunk) {
+                  parser.append(chunk);
+                  prevContent.value += chunk;
+                }
                 emit('progress', controller.progress);
                 triggerUpdate();
               },

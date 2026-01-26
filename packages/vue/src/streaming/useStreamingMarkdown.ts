@@ -108,9 +108,11 @@ export function useStreamingMarkdown(
 
     controller.start(
       source,
-      (_chunk, accumulated) => {
-        parser.reset();
-        parser.append(accumulated);
+      (chunk) => {
+        // 增量追加，避免每个 chunk 都 reset 导致整树重建闪烁
+        if (chunk) {
+          parser.append(chunk);
+        }
         progress.value = controller.progress;
         triggerUpdate();
       },

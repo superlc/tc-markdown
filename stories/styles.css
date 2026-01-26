@@ -178,7 +178,6 @@
 }
 
 .streaming-demo .content-area {
-  border: 1px solid #e1e4e8;
   border-radius: 0.5rem;
   padding: 1rem;
   min-height: 200px;
@@ -260,20 +259,9 @@
   position: relative;
 }
 
+/* 光标效果已禁用：在列表/行内场景会引入额外 inline box，导致高度跳动 */
 [data-pending="true"]::after {
-  content: '';
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background: #0366d6;
-  margin-left: 2px;
-  animation: cursor-blink 1s infinite;
-  vertical-align: text-bottom;
-}
-
-@keyframes cursor-blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  display: none;
 }
 
 /* 代码块 pending 状态 */

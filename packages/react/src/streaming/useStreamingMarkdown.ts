@@ -1,13 +1,44 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import type { ReactElement } from 'react';
 import {
   createStreamingParser,
   OutputRateController,
   type OutputRateStatus,
+  type BlockInfo,
 } from '@tc/md-core';
 import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { UseStreamingMarkdownOptions, UseStreamingMarkdownResult } from './types';
+
+/**
+ * 稳定块渲染组件
+ * Hook 场景下也按块渲染，避免每次更新都重建整棵树导致闪烁
+ */
+const StableBlock = memo<{
+  block: BlockInfo;
+  components?: Components;
+}>(
+  ({ block, components }) => {
+    if (!block.hast) return null;
+
+    try {
+      return toJsxRuntime(block.hast, {
+        jsx,
+        jsxs,
+        Fragment,
+        components,
+      }) as ReactElement;
+    } catch {
+      return null;
+    }
+  },
+  (prev, next) => {
+    // 只有 key 相同且都是稳定块时跳过重渲染
+    return prev.block.key === next.block.key && prev.block.stable && next.block.stable;
+  }
+);
+
+StableBlock.displayName = 'StableBlock';
 
 /**
  * 流式 Markdown 渲染 Hook
@@ -80,10 +111,11 @@ export function useStreamingMarkdown(
 
       controllerRef.current.start(
         source,
-        (chunk, accumulated) => {
-          // 重置并重新解析累积内容
-          parserRef.current.reset();
-          parserRef.current.append(accumulated);
+        (chunk) => {
+          // 增量追加，避免每个 chunk 都 reset 导致整树重建闪烁
+          if (chunk) {
+            parserRef.current.append(chunk);
+          }
           setProgress(controllerRef.current.progress);
           triggerUpdate();
         },
@@ -166,23 +198,26 @@ export function useStreamingMarkdown(
   const stats = parserRef.current.getStats();
   const content = parserRef.current.getContent();
 
-  // 转换 HAST 为 React 元素
-  const element = useMemo(() => {
-    if (state.hast.children.length === 0) {
-      return null;
-    }
+  // 按块渲染：稳定块通过 key 复用，避免 Hook 场景整树重建闪烁
+  const renderedBlocks = useMemo(() => {
+    return state.blocks.map((block) =>
+      jsx(
+        StableBlock,
+        {
+          block,
+          components: components as Components,
+        },
+        block.key
+      )
+    );
+  }, [state.blocks, components, version]);
 
-    try {
-      return toJsxRuntime(state.hast, {
-        jsx,
-        jsxs,
-        Fragment,
-        components: components as Components,
-      }) as ReactElement;
-    } catch {
+  const element = useMemo(() => {
+    if (state.blocks.length === 0) {
       return null;
     }
-  }, [state.hast, components, version]);
+    return jsx(Fragment, { children: renderedBlocks });
+  }, [renderedBlocks, state.blocks.length]);
 
   return {
     element,

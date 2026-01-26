@@ -101,11 +101,12 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
 
         controllerRef.current.start(
           source,
-          (chunk, accumulated) => {
-            // 重置并重新解析累积内容
-            parserRef.current.reset();
-            parserRef.current.append(accumulated);
-            prevContentRef.current = accumulated;
+          (chunk) => {
+            // 增量追加，避免每个 chunk 都 reset 导致整树重建闪烁
+            if (chunk) {
+              parserRef.current.append(chunk);
+              prevContentRef.current += chunk;
+            }
             onProgress?.(controllerRef.current.progress);
             triggerUpdate();
           },
