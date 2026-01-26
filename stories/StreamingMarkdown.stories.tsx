@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   StreamingMarkdown,
   useStreamingMarkdown,
   type BlockInfo,
+  type OutputRatePreset,
 } from '@tc/md-react';
 import './styles.css';
 
@@ -68,110 +69,45 @@ export const Button: React.FC<ButtonProps> = ({ label, onClick }) => (
 
 \`\`\`
 
-| 概念 | 说明 | 说明 | 说明 | 说明 | 说明 | 说明 | 说明 | 说明 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| 实例 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 | 云端的虚拟计算资源，包括 CPU、内存、操作系统、网络、磁盘等最基础的计算组件。腾讯云为云服务器提供了不同的 CPU、内存、存储和网络配置，详情请参见 实例规格。 |
-| 云数据库 | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) |
-| 云存储 | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) |
-| 内容分发网络 | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) | 参考[价格页](https://cloud.tencent.com/price/) |
-
-![](https://cloudcache.tencent-cloud.com/qcloud/ui/static/static_source_business/ca7caae9-3dc3-4e2f-9e4d-bf8a7ad9f8fe.png)
+| 概念 | 说明 |
+| ---- | ---- |
+| 实例 | 云端的虚拟计算资源 |
+| 云数据库 | 参考[价格页](https://cloud.tencent.com/price/) |
 
 ---
 以上信息仅供参考，具体信息请以腾讯云官网为准。
 
 **腾讯云**，让创新更简单。
 > Dorothy followed her through many of the beautiful rooms in her castle.
->
->> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.
 
 ##### 列表
 1. 有序列表
 2. 有序列表
 
-    1.有序列表
-
-    2.有序列表
-3.有序列表
-
 ##### 任务列表
 - [x] 任务列表
-  - [x] 任务列表
-  - [ ] 任务列表
-- [ ] 任务列表
 - [ ] 任务列表
 `;
 
-// 模拟流式输入的函数
-function useSimulatedStream(
-  text: string,
-  speed: number = 30,
-  chunkSize: number = 1
-) {
-  const [content, setContent] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-
-  const start = useCallback(() => {
-    setContent('');
-    setIsStreaming(true);
-    setIsComplete(false);
-
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        const chunk = text.slice(index, index + chunkSize);
-        setContent((prev) => prev + chunk);
-        index += chunkSize;
-      } else {
-        clearInterval(interval);
-        setIsStreaming(false);
-        setIsComplete(true);
-      }
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [text, speed, chunkSize]);
-
-  const reset = useCallback(() => {
-    setContent('');
-    setIsStreaming(false);
-    setIsComplete(false);
-  }, []);
-
-  return { content, isStreaming, isComplete, start, reset };
-}
-
 /**
- * 基础流式渲染示例
+ * 基础流式渲染 - 使用内置速率控制
  */
 export const Basic: Story = {
   render: () => {
-    const { content, isStreaming, isComplete, start, reset } =
-      useSimulatedStream(sampleContent, 20, 3);
+    const [key, setKey] = useState(0);
 
     return (
       <div className="streaming-demo">
         <div className="controls">
-          <button onClick={start} disabled={isStreaming}>
-            {isStreaming ? '输出中...' : '开始流式输出'}
-          </button>
-          <button onClick={reset} disabled={isStreaming}>
-            重置
-          </button>
-          <span className="status">
-            {isStreaming
-              ? '⏳ 流式输出中'
-              : isComplete
-                ? '✅ 完成'
-                : '⏸️ 就绪'}
-          </span>
+          <button onClick={() => setKey((k) => k + 1)}>重新开始</button>
+          <span className="status">默认中速 (medium)</span>
         </div>
 
         <div className="content-area">
           <StreamingMarkdown
-            content={content}
-            isComplete={isComplete}
+            key={key}
+            source={sampleContent}
+            outputRate="medium"
             className="markdown-body"
           />
         </div>
@@ -181,73 +117,148 @@ export const Basic: Story = {
 };
 
 /**
- * 使用 Hook 的示例
+ * 速率选择器 - 可切换不同速率预设
  */
-export const WithHook: Story = {
+export const RateSelector: Story = {
   render: () => {
-    const { element, append, reset, finish, blocks, stats, isComplete } =
-      useStreamingMarkdown({
-        gfm: true,
-        highlight: true,
-      });
+    const [rate, setRate] = useState<OutputRatePreset>('medium');
+    const [key, setKey] = useState(0);
 
-    const [isStreaming, setIsStreaming] = useState(false);
-    const intervalRef = React.useRef<number | null>(null);
-
-    const startStream = () => {
-      reset();
-      setIsStreaming(true);
-
-      let index = 0;
-      intervalRef.current = window.setInterval(() => {
-        if (index < sampleContent.length) {
-          const chunk = sampleContent.slice(index, index + 5);
-          append(chunk);
-          index += 5;
-        } else {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          finish();
-          setIsStreaming(false);
-        }
-      }, 30);
+    const handleRateChange = (newRate: OutputRatePreset) => {
+      setRate(newRate);
+      setKey((k) => k + 1);
     };
-
-    const handleReset = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      reset();
-      setIsStreaming(false);
-    };
-
-    useEffect(() => {
-      return () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-    }, []);
 
     return (
       <div className="streaming-demo">
         <div className="controls">
-          <button onClick={startStream} disabled={isStreaming}>
-            {isStreaming ? '输出中...' : '开始流式输出'}
+          <button
+            onClick={() => handleRateChange('slow')}
+            className={rate === 'slow' ? 'active' : ''}
+          >
+            🐢 慢速
           </button>
-          <button onClick={handleReset} disabled={isStreaming}>
-            重置
+          <button
+            onClick={() => handleRateChange('medium')}
+            className={rate === 'medium' ? 'active' : ''}
+          >
+            🚶 中速
           </button>
+          <button
+            onClick={() => handleRateChange('fast')}
+            className={rate === 'fast' ? 'active' : ''}
+          >
+            🚀 快速
+          </button>
+          <button
+            onClick={() => handleRateChange('instant')}
+            className={rate === 'instant' ? 'active' : ''}
+          >
+            ⚡ 立即
+          </button>
+          <button onClick={() => setKey((k) => k + 1)}>重新开始</button>
+        </div>
+
+        <div className="content-area">
+          <StreamingMarkdown
+            key={key}
+            source={sampleContent}
+            outputRate={rate}
+            className="markdown-body"
+          />
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * 使用 Hook - 支持暂停/恢复/跳过
+ */
+export const WithHookControls: Story = {
+  render: () => {
+    const {
+      element,
+      start,
+      pause,
+      resume,
+      skipToEnd,
+      reset,
+      blocks,
+      stats,
+      progress,
+      outputStatus,
+    } = useStreamingMarkdown({
+      gfm: true,
+      highlight: true,
+      outputRate: 'medium',
+    });
+
+    const handleStart = () => {
+      start(sampleContent);
+    };
+
+    return (
+      <div className="streaming-demo">
+        <div className="controls">
+          <button onClick={handleStart} disabled={outputStatus === 'running'}>
+            开始
+          </button>
+          <button
+            onClick={pause}
+            disabled={outputStatus !== 'running'}
+          >
+            暂停
+          </button>
+          <button
+            onClick={resume}
+            disabled={outputStatus !== 'paused'}
+          >
+            恢复
+          </button>
+          <button
+            onClick={skipToEnd}
+            disabled={outputStatus === 'idle' || outputStatus === 'complete'}
+          >
+            跳过
+          </button>
+          <button onClick={reset}>重置</button>
+          <span className="status">
+            {outputStatus === 'running' && '⏳ 输出中'}
+            {outputStatus === 'paused' && '⏸️ 已暂停'}
+            {outputStatus === 'complete' && '✅ 完成'}
+            {outputStatus === 'idle' && '⏸️ 就绪'}
+          </span>
         </div>
 
         <div className="stats-panel">
-          <h4>📊 性能统计</h4>
+          <h4>📊 状态信息</h4>
           <ul>
+            <li>进度: {(progress * 100).toFixed(1)}%</li>
             <li>追加次数: {stats.totalAppends}</li>
-            <li>缓存命中: {stats.cacheHits}</li>
-            <li>缓存未命中: {stats.cacheMisses}</li>
-            <li>平均解析时间: {stats.avgParseTime.toFixed(2)}ms</li>
             <li>块数量: {blocks.length}</li>
             <li>
-              稳定块: {blocks.filter((b) => b.stable).length} /{' '}
-              {blocks.length}
+              稳定块: {blocks.filter((b) => b.stable).length} / {blocks.length}
             </li>
           </ul>
+          <div
+            style={{
+              height: '4px',
+              background: '#e1e4e8',
+              borderRadius: '2px',
+              marginTop: '8px',
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${progress * 100}%`,
+                background: '#0366d6',
+                borderRadius: '2px',
+                transition: 'width 0.1s',
+              }}
+            />
+          </div>
         </div>
 
         <div className="content-area">
@@ -264,13 +275,12 @@ export const WithHook: Story = {
 export const WithBlockEvents: Story = {
   render: () => {
     const [events, setEvents] = useState<string[]>([]);
-    const { content, isStreaming, isComplete, start, reset } =
-      useSimulatedStream(sampleContent, 30, 5);
+    const [key, setKey] = useState(0);
 
     const handleBlockStable = (block: BlockInfo) => {
       setEvents((prev) => [
         ...prev.slice(-9),
-        `块 ${block.index} 稳定: ${block.type} (key: ${block.key.slice(0, 20)}...)`,
+        `块 ${block.index} 稳定: ${block.type} (key: ${block.key.slice(0, 15)}...)`,
       ]);
     };
 
@@ -279,19 +289,14 @@ export const WithBlockEvents: Story = {
     };
 
     const handleReset = () => {
-      reset();
       setEvents([]);
+      setKey((k) => k + 1);
     };
 
     return (
       <div className="streaming-demo">
         <div className="controls">
-          <button onClick={start} disabled={isStreaming}>
-            开始
-          </button>
-          <button onClick={handleReset} disabled={isStreaming}>
-            重置
-          </button>
+          <button onClick={handleReset}>重新开始</button>
         </div>
 
         <div className="events-panel">
@@ -305,8 +310,9 @@ export const WithBlockEvents: Story = {
 
         <div className="content-area">
           <StreamingMarkdown
-            content={content}
-            isComplete={isComplete}
+            key={key}
+            source={sampleContent}
+            outputRate="medium"
             onComplete={handleComplete}
             onBlockStable={handleBlockStable}
             className="markdown-body"
@@ -322,61 +328,96 @@ export const WithBlockEvents: Story = {
  */
 export const SpeedComparison: Story = {
   render: () => {
-    const slow = useSimulatedStream(sampleContent, 100, 1);
-    const medium = useSimulatedStream(sampleContent, 30, 3);
-    const fast = useSimulatedStream(sampleContent, 10, 10);
-
-    const startAll = () => {
-      slow.start();
-      medium.start();
-      fast.start();
-    };
-
-    const resetAll = () => {
-      slow.reset();
-      medium.reset();
-      fast.reset();
-    };
+    const [key, setKey] = useState(0);
 
     return (
       <div className="streaming-demo">
         <div className="controls">
-          <button
-            onClick={startAll}
-            disabled={slow.isStreaming || medium.isStreaming || fast.isStreaming}
-          >
-            同时开始
-          </button>
-          <button onClick={resetAll}>全部重置</button>
+          <button onClick={() => setKey((k) => k + 1)}>同时重新开始</button>
         </div>
 
         <div className="comparison-grid">
           <div className="comparison-item">
-            <h4>🐢 慢速 (100ms/字符)</h4>
+            <h4>🐢 慢速 (slow)</h4>
             <StreamingMarkdown
-              content={slow.content}
-              isComplete={slow.isComplete}
+              key={`slow-${key}`}
+              source={sampleContent}
+              outputRate="slow"
               className="markdown-body"
             />
           </div>
 
           <div className="comparison-item">
-            <h4>🚶 中速 (30ms/3字符)</h4>
+            <h4>🚶 中速 (medium)</h4>
             <StreamingMarkdown
-              content={medium.content}
-              isComplete={medium.isComplete}
+              key={`medium-${key}`}
+              source={sampleContent}
+              outputRate="medium"
               className="markdown-body"
             />
           </div>
 
           <div className="comparison-item">
-            <h4>🚀 快速 (10ms/10字符)</h4>
+            <h4>🚀 快速 (fast)</h4>
             <StreamingMarkdown
-              content={fast.content}
-              isComplete={fast.isComplete}
+              key={`fast-${key}`}
+              source={sampleContent}
+              outputRate="fast"
               className="markdown-body"
             />
           </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * 自定义速率
+ */
+export const CustomRate: Story = {
+  render: () => {
+    const [interval, setInterval] = useState(40);
+    const [chunkSize, setChunkSize] = useState(3);
+    const [key, setKey] = useState(0);
+
+    return (
+      <div className="streaming-demo">
+        <div className="controls" style={{ flexWrap: 'wrap', gap: '8px' }}>
+          <label>
+            间隔 (ms):
+            <input
+              type="range"
+              min="5"
+              max="100"
+              value={interval}
+              onChange={(e) => setInterval(Number(e.target.value))}
+              style={{ width: '100px', marginLeft: '8px' }}
+            />
+            {interval}
+          </label>
+          <label>
+            字符数:
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={chunkSize}
+              onChange={(e) => setChunkSize(Number(e.target.value))}
+              style={{ width: '100px', marginLeft: '8px' }}
+            />
+            {chunkSize}
+          </label>
+          <button onClick={() => setKey((k) => k + 1)}>应用并重新开始</button>
+        </div>
+
+        <div className="content-area">
+          <StreamingMarkdown
+            key={key}
+            source={sampleContent}
+            outputRate={{ interval, chunkSize }}
+            className="markdown-body"
+          />
         </div>
       </div>
     );

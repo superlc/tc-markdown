@@ -7,7 +7,14 @@ import {
   type PropType,
   type VNode,
 } from 'vue';
-import { createStreamingParser, type BlockInfo, type Root, type Element } from '@tc/md-core';
+import {
+  createStreamingParser,
+  OutputRateController,
+  type BlockInfo,
+  type Root,
+  type Element,
+  type OutputRate,
+} from '@tc/md-core';
 import type { MarkdownComponents } from '../types';
 
 /**
@@ -34,7 +41,6 @@ function hastToVNode(
     const CustomComponent = components?.[tagName];
     const props: Record<string, unknown> = { ...element.properties };
 
-    // 转换 className 为 class
     if (props.className) {
       props.class = Array.isArray(props.className)
         ? props.className.join(' ')
@@ -58,64 +64,68 @@ function hastToVNode(
 
 /**
  * 流式 Markdown 渲染组件
- * 声明式 API，支持受控模式
  */
 export const StreamingMarkdown = defineComponent({
   name: 'StreamingMarkdown',
 
   props: {
-    /** 当前累积的 Markdown 内容 */
     content: {
       type: String,
-      required: true,
+      default: undefined,
     },
-    /** 是否已完成流式输入 */
+    source: {
+      type: String,
+      default: undefined,
+    },
+    outputRate: {
+      type: [String, Object] as PropType<OutputRate>,
+      default: 'medium',
+    },
     isComplete: {
       type: Boolean,
       default: false,
     },
-    /** 自定义组件映射 */
     components: {
       type: Object as PropType<MarkdownComponents>,
       default: undefined,
     },
-    /** 容器 class */
     class: {
       type: String,
       default: undefined,
     },
-    /** 最小更新间隔 (ms) */
     minUpdateInterval: {
       type: Number,
       default: 16,
     },
-    /** 启用 GFM */
+    autoStart: {
+      type: Boolean,
+      default: true,
+    },
     gfm: {
       type: Boolean,
       default: true,
     },
-    /** 启用代码高亮 */
     highlight: {
       type: Boolean,
       default: true,
     },
   },
 
-  emits: ['complete', 'blockStable'],
+  emits: ['complete', 'blockStable', 'progress'],
 
   setup(props, { emit }) {
-    // 解析器实例
     const parser = createStreamingParser({
       gfm: props.gfm,
       highlight: props.highlight,
     });
+    const controller = new OutputRateController(props.outputRate);
 
-    // 状态
     const version = ref(0);
     const prevContent = ref('');
+    const prevSource = ref<string | undefined>(undefined);
     const prevBlocks = ref<BlockInfo[]>([]);
+    const streamComplete = ref(false);
 
-    // 更新节流
     let lastUpdate = 0;
     let pendingUpdate: number | null = null;
 
@@ -135,31 +145,67 @@ export const StreamingMarkdown = defineComponent({
       }
     };
 
-    // 监听内容变化
+    // source 模式
+    watch(
+      () => props.source,
+      (newSource) => {
+        if (newSource !== undefined && newSource !== prevSource.value) {
+          prevSource.value = newSource;
+
+          if (props.autoStart && newSource) {
+            parser.reset();
+            prevContent.value = '';
+            streamComplete.value = false;
+
+            controller.start(
+              newSource,
+              (_chunk, accumulated) => {
+                parser.reset();
+                parser.append(accumulated);
+                prevContent.value = accumulated;
+                emit('progress', controller.progress);
+                triggerUpdate();
+              },
+              () => {
+                parser.finish();
+                streamComplete.value = true;
+                emit('complete');
+                triggerUpdate();
+              }
+            );
+          }
+        }
+      },
+      { immediate: true }
+    );
+
+    // content 模式
     watch(
       () => props.content,
       (newContent) => {
-        const oldContent = prevContent.value;
+        if (props.source !== undefined) {
+          return;
+        }
 
-        if (newContent !== oldContent) {
-          if (newContent.startsWith(oldContent)) {
-            // 追加模式
-            const chunk = newContent.slice(oldContent.length);
+        const oldContent = prevContent.value;
+        const currentContent = newContent || '';
+
+        if (currentContent !== oldContent) {
+          if (currentContent.startsWith(oldContent)) {
+            const chunk = currentContent.slice(oldContent.length);
             if (chunk) {
               parser.append(chunk);
             }
           } else {
-            // 替换模式
             parser.reset();
-            if (newContent) {
-              parser.append(newContent);
+            if (currentContent) {
+              parser.append(currentContent);
             }
           }
 
-          prevContent.value = newContent;
+          prevContent.value = currentContent;
           triggerUpdate();
 
-          // 检测块稳定事件
           const currentBlocks = parser.getState().blocks;
           currentBlocks.forEach((block, index) => {
             const prev = prevBlocks.value[index];
@@ -173,10 +219,14 @@ export const StreamingMarkdown = defineComponent({
       { immediate: true }
     );
 
-    // 监听完成状态
+    // isComplete 变化（content 模式）
     watch(
       () => props.isComplete,
       (isComplete) => {
+        if (props.source !== undefined) {
+          return;
+        }
+
         if (isComplete) {
           parser.finish();
           if (pendingUpdate !== null) {
@@ -189,20 +239,29 @@ export const StreamingMarkdown = defineComponent({
       }
     );
 
-    // 清理
+    // outputRate 变化
+    watch(
+      () => props.outputRate,
+      (rate) => {
+        controller.setRate(rate);
+      }
+    );
+
     onUnmounted(() => {
+      controller.stop();
       if (pendingUpdate !== null) {
         cancelAnimationFrame(pendingUpdate);
       }
     });
 
     return () => {
-      // 依赖 version 触发更新
       void version.value;
 
       const state = parser.getState();
+      const isStreamComplete = props.source !== undefined 
+        ? streamComplete.value 
+        : props.isComplete;
 
-      // 渲染块
       const children = state.blocks
         .map((block) => {
           if (!block.hast) return null;
@@ -222,7 +281,7 @@ export const StreamingMarkdown = defineComponent({
         'div',
         {
           class: props.class,
-          'data-streaming': !props.isComplete,
+          'data-streaming': !isStreamComplete,
         },
         children
       );

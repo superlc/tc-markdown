@@ -1,5 +1,11 @@
 import { ref, computed, onUnmounted, h, type VNode } from 'vue';
-import { createStreamingParser, type Root, type Element } from '@tc/md-core';
+import {
+  createStreamingParser,
+  OutputRateController,
+  type Root,
+  type Element,
+  type OutputRateStatus,
+} from '@tc/md-core';
 import type { UseStreamingMarkdownOptions, UseStreamingMarkdownResult } from './types';
 import type { MarkdownComponents } from '../types';
 
@@ -27,7 +33,6 @@ function hastToVNode(
     const CustomComponent = components?.[tagName];
     const props: Record<string, unknown> = { ...element.properties };
 
-    // 转换 className 为 class
     if (props.className) {
       props.class = Array.isArray(props.className)
         ? props.className.join(' ')
@@ -51,7 +56,6 @@ function hastToVNode(
 
 /**
  * 流式 Markdown 渲染 Composable
- * 支持高性能增量解析和渲染
  */
 export function useStreamingMarkdown(
   options: UseStreamingMarkdownOptions = {}
@@ -60,21 +64,21 @@ export function useStreamingMarkdown(
     components,
     minUpdateInterval = 16,
     immediate = false,
+    outputRate = 'medium',
     ...parserOptions
   } = options;
 
-  // 解析器实例
   const parser = createStreamingParser(parserOptions);
+  const controller = new OutputRateController(outputRate);
 
-  // 响应式状态
   const version = ref(0);
   const isComplete = ref(false);
+  const progress = ref(0);
+  const outputStatus = ref<OutputRateStatus>('idle');
 
-  // 更新节流
   let lastUpdate = 0;
   let pendingUpdate: number | null = null;
 
-  // 触发更新
   const triggerUpdate = () => {
     const now = performance.now();
     const elapsed = now - lastUpdate;
@@ -91,27 +95,56 @@ export function useStreamingMarkdown(
     }
   };
 
-  // 追加内容
   const append = (chunk: string) => {
     parser.append(chunk);
     triggerUpdate();
   };
 
-  // 标记完成
-  const finish = () => {
-    parser.finish();
-    isComplete.value = true;
-    if (pendingUpdate !== null) {
-      cancelAnimationFrame(pendingUpdate);
-      pendingUpdate = null;
-    }
-    version.value++;
-  };
-
-  // 重置
-  const reset = () => {
+  const start = (source: string) => {
     parser.reset();
     isComplete.value = false;
+    progress.value = 0;
+    outputStatus.value = 'running';
+
+    controller.start(
+      source,
+      (_chunk, accumulated) => {
+        parser.reset();
+        parser.append(accumulated);
+        progress.value = controller.progress;
+        triggerUpdate();
+      },
+      () => {
+        parser.finish();
+        isComplete.value = true;
+        progress.value = 1;
+        outputStatus.value = 'complete';
+        triggerUpdate();
+      }
+    );
+  };
+
+  const pause = () => {
+    controller.pause();
+    outputStatus.value = controller.status;
+  };
+
+  const resume = () => {
+    controller.resume();
+    outputStatus.value = controller.status;
+  };
+
+  const skipToEnd = () => {
+    controller.skipToEnd();
+    outputStatus.value = controller.status;
+    progress.value = 1;
+  };
+
+  const finish = () => {
+    controller.stop();
+    parser.finish();
+    isComplete.value = true;
+    outputStatus.value = 'complete';
     if (pendingUpdate !== null) {
       cancelAnimationFrame(pendingUpdate);
       pendingUpdate = null;
@@ -119,33 +152,41 @@ export function useStreamingMarkdown(
     version.value++;
   };
 
-  // 清理
+  const reset = () => {
+    controller.stop();
+    parser.reset();
+    isComplete.value = false;
+    progress.value = 0;
+    outputStatus.value = 'idle';
+    if (pendingUpdate !== null) {
+      cancelAnimationFrame(pendingUpdate);
+      pendingUpdate = null;
+    }
+    version.value++;
+  };
+
   onUnmounted(() => {
+    controller.stop();
     if (pendingUpdate !== null) {
       cancelAnimationFrame(pendingUpdate);
     }
   });
 
-  // 计算属性：块信息
   const blocks = computed(() => {
-    // 依赖 version 触发更新
     void version.value;
     return parser.getState().blocks;
   });
 
-  // 计算属性：性能统计
   const stats = computed(() => {
     void version.value;
     return parser.getStats();
   });
 
-  // 计算属性：内容
   const content = computed(() => {
     void version.value;
     return parser.getContent();
   });
 
-  // 计算属性：VNode
   const vnode = computed<VNode | null>(() => {
     void version.value;
     const state = parser.getState();
@@ -154,7 +195,6 @@ export function useStreamingMarkdown(
       return null;
     }
 
-    // 将每个块渲染为 VNode
     const children = state.blocks
       .map((block) => {
         if (!block.hast) return null;
@@ -176,11 +216,17 @@ export function useStreamingMarkdown(
   return {
     vnode,
     append,
+    start,
+    pause,
+    resume,
+    skipToEnd,
     reset,
     finish,
     blocks,
     stats,
     isComplete,
     content,
+    progress,
+    outputStatus,
   };
 }

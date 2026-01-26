@@ -18,3 +18,12 @@ export type {
   BlockInfo,
   BlockType,
 } from './streaming';
+
+// 输出速率控制
+export { OutputRateController, RATE_PRESETS, DEFAULT_RATE } from './output-rate';
+export type {
+  OutputRate,
+  OutputRatePreset,
+  OutputRateCustom,
+  OutputRateStatus,
+} from './output-rate';

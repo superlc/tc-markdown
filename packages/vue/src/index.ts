@@ -21,7 +21,16 @@ export type {
 } from './streaming';
 
 // 重新导出 core 的类型
-export type { ProcessorOptions, PluginConfig, BlockInfo, ParserStats } from '@tc/md-core';
+export type {
+  ProcessorOptions,
+  PluginConfig,
+  BlockInfo,
+  ParserStats,
+  OutputRate,
+  OutputRatePreset,
+  OutputRateCustom,
+  OutputRateStatus,
+} from '@tc/md-core';
 
 /**
  * Vue 插件安装函数

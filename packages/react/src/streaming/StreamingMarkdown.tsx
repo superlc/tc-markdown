@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useMemo, memo } from 'react';
 import type { FC, ReactElement } from 'react';
-import { createStreamingParser, type BlockInfo } from '@tc/md-core';
+import {
+  createStreamingParser,
+  OutputRateController,
+  type BlockInfo,
+} from '@tc/md-core';
 import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { StreamingMarkdownProps } from './types';
@@ -37,23 +41,30 @@ StableBlock.displayName = 'StableBlock';
 
 /**
  * 流式 Markdown 渲染组件
- * 声明式 API，支持受控模式
+ * 声明式 API，支持受控模式和内置速率控制模式
  */
 export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
   content,
+  source,
+  outputRate = 'medium',
   isComplete = false,
   onComplete,
   onBlockStable,
+  onProgress,
   components,
   className,
   minUpdateInterval = 16,
+  autoStart = true,
   ...parserOptions
 }) => {
   // 解析器实例
   const parserRef = useRef(createStreamingParser(parserOptions));
-  
+  // 速率控制器实例
+  const controllerRef = useRef(new OutputRateController(outputRate));
+
   // 上一次的内容和块状态
   const prevContentRef = useRef('');
+  const prevSourceRef = useRef<string | undefined>(undefined);
   const prevBlocksRef = useRef<BlockInfo[]>([]);
 
   // 更新节流
@@ -78,33 +89,73 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
     }
   };
 
-  // 内容变化时更新解析器
+  // source 模式：使用内置速率控制
   useEffect(() => {
+    if (source !== undefined && source !== prevSourceRef.current) {
+      prevSourceRef.current = source;
+
+      if (autoStart && source) {
+        // 重置解析器
+        parserRef.current.reset();
+        prevContentRef.current = '';
+
+        controllerRef.current.start(
+          source,
+          (chunk, accumulated) => {
+            // 重置并重新解析累积内容
+            parserRef.current.reset();
+            parserRef.current.append(accumulated);
+            prevContentRef.current = accumulated;
+            onProgress?.(controllerRef.current.progress);
+            triggerUpdate();
+          },
+          () => {
+            parserRef.current.finish();
+            onComplete?.();
+            triggerUpdate();
+          }
+        );
+      }
+    }
+  }, [source, autoStart, onComplete, onProgress]);
+
+  // content 模式：外部控制（仅当 source 未提供时）
+  useEffect(() => {
+    if (source !== undefined) {
+      // source 模式优先，忽略 content
+      return;
+    }
+
     const prevContent = prevContentRef.current;
-    
-    if (content !== prevContent) {
+    const currentContent = content || '';
+
+    if (currentContent !== prevContent) {
       // 检测是追加还是替换
-      if (content.startsWith(prevContent)) {
+      if (currentContent.startsWith(prevContent)) {
         // 追加模式
-        const newChunk = content.slice(prevContent.length);
+        const newChunk = currentContent.slice(prevContent.length);
         if (newChunk) {
           parserRef.current.append(newChunk);
         }
       } else {
         // 替换模式，重置解析器
         parserRef.current.reset();
-        if (content) {
-          parserRef.current.append(content);
+        if (currentContent) {
+          parserRef.current.append(currentContent);
         }
       }
-      
-      prevContentRef.current = content;
+
+      prevContentRef.current = currentContent;
       triggerUpdate();
     }
-  }, [content]);
+  }, [content, source]);
 
-  // 完成状态变化
+  // 完成状态变化（仅 content 模式）
   useEffect(() => {
+    if (source !== undefined) {
+      return;
+    }
+
     if (isComplete) {
       parserRef.current.finish();
       if (pendingUpdateRef.current !== null) {
@@ -114,7 +165,12 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
       forceUpdate();
       onComplete?.();
     }
-  }, [isComplete, onComplete]);
+  }, [isComplete, onComplete, source]);
+
+  // 更新速率配置
+  useEffect(() => {
+    controllerRef.current.setRate(outputRate);
+  }, [outputRate]);
 
   // 检测块稳定事件
   useEffect(() => {
@@ -136,6 +192,7 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
   // 清理
   useEffect(() => {
     return () => {
+      controllerRef.current.stop();
       if (pendingUpdateRef.current !== null) {
         cancelAnimationFrame(pendingUpdateRef.current);
       }
@@ -144,6 +201,11 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
 
   // 获取当前状态
   const state = parserRef.current.getState();
+
+  // 判断是否完成
+  const isStreamComplete = source !== undefined 
+    ? controllerRef.current.status === 'complete' 
+    : isComplete;
 
   // 渲染块
   const renderedBlocks = useMemo(() => {
@@ -157,7 +219,7 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
   }, [state.blocks, components]);
 
   return (
-    <div className={className} data-streaming={!isComplete}>
+    <div className={className} data-streaming={!isStreamComplete}>
       {renderedBlocks}
     </div>
   );
