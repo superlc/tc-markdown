@@ -39,13 +39,12 @@ export class BlockCache {
 
   /**
    * 生成块的 key
+   * 注意：不区分 pending/stable，只使用 index + source hash
+   * 这样当块从 pending 变成 stable 时，key 保持不变，避免 React 销毁重建组件
    */
-  generateKey(index: number, source: string, stable: boolean): string {
-    if (stable) {
-      const hash = simpleHash(source);
-      return `stable-${index}-${hash}`;
-    }
-    return `pending-${index}`;
+  generateKey(index: number, source: string, _stable: boolean): string {
+    const hash = simpleHash(source);
+    return `block-${index}-${hash}`;
   }
 
   /**

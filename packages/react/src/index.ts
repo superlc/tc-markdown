@@ -11,6 +11,7 @@ export type { MarkdownProps, MarkdownComponents, UseMarkdownOptions } from './ty
 export {
   useStreamingMarkdown,
   StreamingMarkdown,
+  StreamingImage,
   AnimationText,
   ANIMATION_KEYFRAMES,
 } from './streaming';

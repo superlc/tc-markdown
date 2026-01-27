@@ -6,12 +6,10 @@
 
 /**
  * Token 类型
- * 注意：emphasis 和 inline-code 不再缓冲，由 InlineCompleter 自动补全闭合标记
+ * 注意：emphasis、inline-code、link、image 不再缓冲，由 InlineCompleter 自动补全闭合标记
  */
 export type StreamTokenType =
   | 'text'
-  | 'link'
-  | 'image'
   | 'html'
   | 'table';
 
@@ -45,47 +43,20 @@ interface TokenRecognizer {
  * 参考 x-markdown 的实现
  * 
  * 设计原则：
- * - 链接/图片：只缓冲 `[` 到 `](` 部分，一旦 URL 开始就立即显示，文字逐步更新
- * - 强调/行内代码：不缓冲，由 InlineCompleter 自动补全闭合标记实现逐字显示
+ * - 链接/图片/强调/行内代码：不缓冲，由 InlineCompleter 自动补全闭合标记实现逐字显示
+ * - HTML 标签：缓冲到闭合
  */
 const STREAM_INCOMPLETE_REGEX = {
-  // 图片：只缓冲 `![` 开始直到 `](url)` 完整
-  // 一旦有了 `](` 就不再缓冲，让文字逐步显示
-  image: [
-    /^!\[$/,  // 刚开始 `![`
-    /^!\[[^\]]*$/,  // `![xxx` 等待 `]`
-    /^!\[[^\]]*\]$/,  // `![xxx]` 等待 `(`
-    /^!\[[^\]]*\]\($/,  // `![xxx](` 等待 URL
-  ],
-  // 链接：只缓冲到 `](` 之前
-  link: [
-    /^\[$/,  // 刚开始 `[`
-    /^\[[^\]]*$/,  // `[xxx` 等待 `]`
-    /^\[[^\]]*\]$/,  // `[xxx]` 等待 `(`
-    /^\[[^\]]*\]\($/,  // `[xxx](` 等待 URL
-  ],
   html: [/^<\/$/, /^<\/?[a-zA-Z][a-zA-Z0-9-]{0,100}[^>\r\n]{0,1000}$/],
 } as const;
 
 /**
  * Token 识别器映射
- * 注意：移除了 list、emphasis、inline-code 识别器
+ * 注意：移除了 list、emphasis、inline-code、link、image 识别器
  * - list 由 streaming-parser 的 stripUncertainTailForDisplay 处理
- * - emphasis/inline-code 由 InlineCompleter 自动补全闭合标记
+ * - emphasis/inline-code/link/image 由 InlineCompleter 自动补全闭合标记
  */
 const tokenRecognizers: TokenRecognizer[] = [
-  {
-    tokenType: 'link',
-    isStartOfToken: (pending) => pending.startsWith('[') && !pending.startsWith('!['),
-    isStreamingValid: (pending) =>
-      STREAM_INCOMPLETE_REGEX.link.some((re) => re.test(pending)),
-  },
-  {
-    tokenType: 'image',
-    isStartOfToken: (pending) => pending.startsWith('!'),
-    isStreamingValid: (pending) =>
-      STREAM_INCOMPLETE_REGEX.image.some((re) => re.test(pending)),
-  },
   {
     tokenType: 'html',
     isStartOfToken: (pending) => pending.startsWith('<'),

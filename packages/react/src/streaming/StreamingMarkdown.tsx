@@ -8,6 +8,7 @@ import {
 import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { StreamingMarkdownProps } from './types';
+import { StreamingImage } from './StreamingImage';
 
 /**
  * 稳定块渲染组件
@@ -210,11 +211,17 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
 
   // 渲染块
   const renderedBlocks = useMemo(() => {
+    // 合并默认图片组件与用户自定义组件
+    const mergedComponents = {
+      img: StreamingImage,
+      ...components,
+    } as Components;
+
     return state.blocks.map((block) => (
       <StableBlock
         key={block.key}
         block={block}
-        components={components as Components}
+        components={mergedComponents}
       />
     ));
   }, [state.blocks, components]);

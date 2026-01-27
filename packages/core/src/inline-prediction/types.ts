@@ -50,4 +50,6 @@ export interface MarkerState {
   type: InlineType;
   marker: string;
   position: number;
+  /** 对于图片，记录 ]( 后 URL 开始的位置，用于替换不完整的 URL */
+  urlStartPosition?: number;
 }

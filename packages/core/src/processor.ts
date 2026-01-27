@@ -3,6 +3,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeHighlight from 'rehype-highlight';
+import { rehypeImageSize } from './plugins/rehype-image-size';
 import type { ProcessorOptions } from './types';
 
 /**
@@ -40,6 +41,9 @@ export function createProcessor(options: ProcessorOptions = {}) {
   if (highlight) {
     processor = processor.use(rehypeHighlight, { detect: true });
   }
+
+  // 提取图片尺寸信息
+  processor = processor.use(rehypeImageSize);
 
   // 添加自定义 rehype 插件
   for (const config of rehypePlugins) {

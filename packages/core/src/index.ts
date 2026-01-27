@@ -38,3 +38,6 @@ export type {
   CompletionResult,
   InlinePredictionOptions,
 } from './inline-prediction';
+
+// 内置插件
+export { rehypeImageSize } from './plugins';

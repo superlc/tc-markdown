@@ -7,6 +7,35 @@ import type {
 } from './types';
 
 /**
+ * 图片占位 SVG：skeleton 背景（带流光动画）+ 图片图标
+ * 尺寸：200x120，浅灰背景 + shimmer 动画 + 居中图片图标
+ * 注意：需要正确编码 # 为 %23 用于 data URI
+ */
+const PLACEHOLDER_SVG_RAW = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+  <defs>
+    <linearGradient id="shimmer" x1="-100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#e8e8e8"/>
+      <stop offset="50%" stop-color="#f5f5f5"/>
+      <stop offset="100%" stop-color="#e8e8e8"/>
+      <animate attributeName="x1" from="-100%" to="100%" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="x2" from="0%" to="200%" dur="1.5s" repeatCount="indefinite"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="120" rx="6" fill="url(#shimmer)"/>
+  <g transform="translate(100,60)">
+    <rect x="-24" y="-18" width="48" height="36" rx="3" fill="#bdbdbd"/>
+    <circle cx="-12" cy="-8" r="5" fill="#9e9e9e"/>
+    <path d="M-24 18 L-24 6 L-8 -2 L4 8 L24 -6 L24 18 Z" fill="#9e9e9e"/>
+  </g>
+</svg>`;
+
+/**
+ * 默认占位图 URL（skeleton SVG data URI）
+ * 使用 encodeURIComponent 正确编码 SVG
+ */
+const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(PLACEHOLDER_SVG_RAW);
+
+/**
  * 默认启用的行内标记类型
  */
 export const DEFAULT_INLINE_TYPES: InlineType[] = [
@@ -88,11 +117,18 @@ export class InlineCompleter {
         }
       }
 
-      // 检测图片 ![
-      if (this.enabledTypes.has('image') && text[i] === '!' && text[i + 1] === '[') {
-        const result = this.handleImageOrLink(text, i, true, markerStack);
-        if (result.skip > 0) {
-          i += result.skip;
+      // 检测图片 ![ 或末尾的单独 !
+      if (this.enabledTypes.has('image') && text[i] === '!') {
+        if (text[i + 1] === '[') {
+          const result = this.handleImageOrLink(text, i, true, markerStack);
+          if (result.skip > 0) {
+            i += result.skip;
+            continue;
+          }
+        } else if (i === len - 1) {
+          // 末尾的单独 !，可能是图片开始
+          markerStack.push({ type: 'image', marker: '!', position: i });
+          i++;
           continue;
         }
       }
@@ -120,6 +156,13 @@ export class InlineCompleter {
         marker: closeMarker,
         openMarker: state.marker,
       });
+
+      // 图片 URL 未完整时，需要替换已输入的不完整 URL 为占位图
+      if (state.marker === '![...](incomplete' && state.urlStartPosition !== undefined) {
+        // 截取到 ]( 位置，然后追加占位图 URL 和闭合括号
+        completedText = completedText.slice(0, state.urlStartPosition) + closeMarker;
+        continue;
+      }
 
       // 特殊处理：如果 marker 正好在文本末尾（常见于 chunk 边界），
       // 直接补全闭合可能仍会短暂显示裸 marker。插入 ZWSP 让 parser 更倾向于生成节点。
@@ -260,7 +303,18 @@ export class InlineCompleter {
       let parenEnd = text.indexOf(')', bracketEnd + 2);
       if (parenEnd === -1) {
         // ( 未闭合
-        stack.push({ type, marker: isImage ? '![...](' : '[...](' , position: pos });
+        if (isImage) {
+          // 图片：URL 未完整时始终使用占位图，避免加载不完整 URL 导致裂图闪烁
+          // 记录 URL 开始位置，用于后续替换不完整的 URL
+          stack.push({ 
+            type, 
+            marker: '![...](incomplete', 
+            position: pos,
+            urlStartPosition: bracketEnd + 2 
+          });
+        } else {
+          stack.push({ type, marker: '[...](' , position: pos });
+        }
         return { skip: bracketEnd + 2 - pos };
       }
       // 完整的链接/图片，跳过
@@ -276,6 +330,13 @@ export class InlineCompleter {
         return { skip: bracketEnd + 2 - pos };
       }
       return { skip: refEnd + 1 - pos };
+    }
+
+    // ] 后面是字符串结尾或其他字符，需要补全 (#) 或 (placeholder)
+    // 这样 [链接] 会被补全为 [链接](#) 形成有效链接
+    if (bracketEnd + 1 >= text.length || !/[([]/.test(text[bracketEnd + 1])) {
+      stack.push({ type, marker: isImage ? '![...]' : '[...]', position: pos });
+      return { skip: bracketEnd + 1 - pos };
     }
 
     // 不是有效的链接语法，跳过
@@ -304,18 +365,45 @@ export class InlineCompleter {
 
   /**
    * 获取闭合标记
+   * - 链接补全为 ](#)，形成可点击但无实际跳转的链接
+   * - 图片补全使用占位图 URL
    */
   private getCloseMarker(state: MarkerState): string {
     switch (state.type) {
       case 'link':
-      case 'image':
         if (state.marker.includes('](')) {
           return ')';
         }
         if (state.marker.includes('][')) {
           return ']';
         }
-        return ']()';
+        // [...]（已有闭合的 ]，需要补全 (#)）
+        if (state.marker === '[...]') {
+          return '(#)';
+        }
+        // 链接补全为 ](#)，显示为可点击链接但不跳转
+        return '](#)';
+      case 'image':
+        // 单独的 !，补全为完整图片语法
+        if (state.marker === '!') {
+          return `[](${DEFAULT_PLACEHOLDER_IMAGE})`;
+        }
+        // 图片 URL 未完整时，使用占位图替代不完整的 URL
+        if (state.marker === '![...](incomplete') {
+          return `${DEFAULT_PLACEHOLDER_IMAGE})`;
+        }
+        if (state.marker.includes('](')) {
+          return ')';
+        }
+        if (state.marker.includes('][')) {
+          return ']';
+        }
+        // ![...]（已有闭合的 ]，需要补全 (placeholder)）
+        if (state.marker === '![...]') {
+          return `(${DEFAULT_PLACEHOLDER_IMAGE})`;
+        }
+        // 图片使用占位图
+        return `](${DEFAULT_PLACEHOLDER_IMAGE})`;
       default:
         return state.marker;
     }

@@ -40,7 +40,7 @@ const linkContent = `
 更多信息请访问 [腾讯云官网](https://cloud.tencent.com/)。
 
 ##### 图片
-![示例图片](https://via.placeholder.com/150)
+![示例图片](https://cloudcache.tencent-cloud.com/qcloud/ui/static/static_source_business/ca7caae9-3dc3-4e2f-9e4d-bf8a7ad9f8fe.png)
 
 ##### 组合
 查看 [价格详情](https://cloud.tencent.com/price/) 或访问 [文档中心](https://cloud.tencent.com/document/)。
