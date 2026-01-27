@@ -9,7 +9,7 @@ export type { ProcessorOptions, ParseOptions, PluginConfig } from './types';
 export type { Root, Element, Text, Comment } from 'hast';
 
 // 流式解析
-export { createStreamingParser, BlockSplitter, BlockCache } from './streaming';
+export { createStreamingParser, BlockSplitter, BlockCache, StreamBuffer, createInitialBufferState } from './streaming';
 export type {
   StreamingParser,
   StreamingParserOptions,
@@ -17,6 +17,8 @@ export type {
   ParserStats,
   BlockInfo,
   BlockType,
+  StreamTokenType,
+  StreamBufferState,
 } from './streaming';
 
 // 输出速率控制

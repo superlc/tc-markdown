@@ -77,6 +77,12 @@ export interface StreamingParserOptions extends ProcessorOptions {
    * 典型场景：流式输出刚好停在列表前缀 "-" / "1." 时，避免先显示前缀后又变成列表导致闪现。
    */
   bufferUncertainPrefixes?: boolean;
+  /**
+   * 是否启用字符级流式缓冲，默认 false。
+   * 启用后会使用更精细的字符级 token 识别，适用于对闪烁敏感的场景。
+   * 注意：会略微增加 CPU 开销。
+   */
+  enableCharacterBuffer?: boolean;
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { Root, Element, RootContent, ElementContent } from 'hast';
+import type { Root, Element, RootContent } from 'hast';
 import type {
   StreamingParser,
   StreamingParserOptions,
@@ -8,8 +8,9 @@ import type {
 } from './types';
 import { BlockSplitter, type RawBlock } from './block-splitter';
 import { BlockCache } from './block-cache';
+import { StreamBuffer } from './stream-buffer';
 import { createProcessor } from '../processor';
-import { InlineCompleter, type CompletionResult } from '../inline-prediction';
+import { InlineCompleter } from '../inline-prediction';
 
 /**
  * 创建流式解析器
@@ -22,6 +23,7 @@ export function createStreamingParser(
     enableInlinePrediction = true,
     predictedInlineTypes,
     bufferUncertainPrefixes = true,
+    enableCharacterBuffer = true,
     ...processorOptions
   } = options;
 
@@ -38,6 +40,9 @@ export function createStreamingParser(
   const inlineCompleter = enableInlinePrediction
     ? new InlineCompleter({ predictedInlineTypes })
     : null;
+  
+  // 字符级缓冲器（可选）
+  const streamBuffer = enableCharacterBuffer ? new StreamBuffer() : null;
 
   // 当前块信息
   let currentBlocks: BlockInfo[] = [];
@@ -71,69 +76,6 @@ export function createStreamingParser(
   }
 
   /**
-   * 为预测补全的节点添加 data-predicted 属性
-   * 递归处理 HAST 树，标记最内层的行内元素
-   */
-  function markPredictedNodes(
-    node: Element,
-    completionResult: CompletionResult
-  ): Element {
-    if (!completionResult.hasCompletions) {
-      return node;
-    }
-
-    // 需要标记的标签名映射
-    const tagMap: Record<string, string[]> = {
-      bold: ['strong', 'b'],
-      italic: ['em', 'i'],
-      code: ['code'],
-      strikethrough: ['del', 's'],
-      link: ['a'],
-      image: ['img'],
-    };
-
-    // 收集需要标记的标签
-    const tagsToMark = new Set<string>();
-    for (const completion of completionResult.completions) {
-      const tags = tagMap[completion.type];
-      if (tags) {
-        tags.forEach((t) => tagsToMark.add(t));
-      }
-    }
-
-    // 递归处理节点
-    function processNode(n: ElementContent): ElementContent {
-      if (n.type !== 'element') {
-        return n;
-      }
-
-      const elem = n as Element;
-      
-      // 递归处理子节点
-      const newChildren = elem.children.map(processNode);
-      
-      // 检查是否需要标记
-      if (tagsToMark.has(elem.tagName)) {
-        return {
-          ...elem,
-          properties: {
-            ...elem.properties,
-            'data-predicted': true,
-          },
-          children: newChildren,
-        };
-      }
-
-      return {
-        ...elem,
-        children: newChildren,
-      };
-    }
-
-    return processNode(node) as Element;
-  }
-
-  /**
    * 处理原始块，返回带 HAST 的块信息
    */
   function processBlocks(rawBlocks: RawBlock[]): BlockInfo[] {
@@ -158,19 +100,13 @@ export function createStreamingParser(
 
         // 行内预测（pair-close 类）
         let sourceToparse = raw.source;
-        let completionResult: CompletionResult | null = null;
 
         if (!stable && inlineCompleter && raw.type !== 'code') {
-          completionResult = inlineCompleter.complete(sourceToparse);
+          const completionResult = inlineCompleter.complete(sourceToparse);
           sourceToparse = completionResult.text;
         }
 
         hast = parseBlock(sourceToparse);
-
-        // 标记预测节点
-        if (completionResult?.hasCompletions && hast) {
-          hast = markPredictedNodes(hast, completionResult);
-        }
 
         totalParseTime += performance.now() - startTime;
 
@@ -273,11 +209,19 @@ export function createStreamingParser(
       content += chunk;
       totalAppends++;
 
-      const parseInput = bufferUncertainPrefixes
-        ? stripUncertainTailForDisplay(content)
-        : content;
+      let parseInput: string;
 
-      // 分割并处理块（使用 parseInput 以避免显示不确定前缀）
+      if (streamBuffer) {
+        // 使用字符级缓冲：更精细的 token 识别
+        parseInput = streamBuffer.process(content);
+      } else if (bufferUncertainPrefixes) {
+        // 使用行级缓冲：处理不确定的块级前缀
+        parseInput = stripUncertainTailForDisplay(content);
+      } else {
+        parseInput = content;
+      }
+
+      // 分割并处理块
       const rawBlocks = splitter.split(parseInput);
       currentBlocks = processBlocks(rawBlocks);
     },
@@ -303,7 +247,11 @@ export function createStreamingParser(
 
     finish(): void {
       isComplete = true;
-      // 完成时不再缓冲，直接按全量内容解析
+      // 完成时刷新缓冲区
+      if (streamBuffer) {
+        streamBuffer.finish();
+      }
+      // 按全量内容解析
       const rawBlocks = splitter.split(content);
       currentBlocks = processBlocks(rawBlocks);
     },
@@ -315,6 +263,9 @@ export function createStreamingParser(
       totalParseTime = 0;
       currentBlocks = [];
       cache.clear();
+      if (streamBuffer) {
+        streamBuffer.reset();
+      }
     },
 
     getContent(): string {

@@ -8,12 +8,23 @@ export { useMarkdown } from './useMarkdown';
 export type { MarkdownProps, MarkdownComponents, UseMarkdownOptions } from './types';
 
 // 流式渲染
-export { useStreamingMarkdown, StreamingMarkdown } from './streaming';
+export {
+  useStreamingMarkdown,
+  StreamingMarkdown,
+  AnimationText,
+  ANIMATION_KEYFRAMES,
+} from './streaming';
 export type {
   UseStreamingMarkdownOptions,
   UseStreamingMarkdownResult,
   StreamingMarkdownProps,
+  AnimationConfig,
+  StreamingConfig,
 } from './streaming';
+
+// 工具函数
+export { sanitizeHast, sanitizeHtml, isDOMPurifyAvailable } from './utils';
+export type { SanitizeConfig } from './utils';
 
 // 重新导出 core 的类型
 export type {

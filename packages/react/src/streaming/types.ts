@@ -1,6 +1,47 @@
 import type { ReactElement } from 'react';
 import type { StreamingParserOptions, ParserStats, BlockInfo, OutputRate, OutputRateStatus } from '@tc/md-core';
 import type { MarkdownComponents } from '../types';
+import type { SanitizeConfig } from '../utils/sanitize';
+
+/**
+ * 文字动画配置
+ */
+export interface AnimationConfig {
+  /**
+   * 淡入动画持续时间（毫秒）
+   * @default 200
+   */
+  fadeDuration?: number;
+  /**
+   * 动画缓动函数
+   * @default 'ease-in-out'
+   */
+  easing?: string;
+}
+
+/**
+ * 流式渲染配置
+ */
+export interface StreamingConfig {
+  /**
+   * 是否启用文字淡入动画
+   * @default false
+   */
+  enableAnimation?: boolean;
+  /**
+   * 动画配置
+   */
+  animationConfig?: AnimationConfig;
+  /**
+   * 是否启用 HTML 安全净化
+   * @default false
+   */
+  enableSanitize?: boolean;
+  /**
+   * DOMPurify 配置（仅当 enableSanitize 为 true 时生效）
+   */
+  sanitizeConfig?: SanitizeConfig;
+}
 
 /**
  * useStreamingMarkdown Hook 配置
@@ -14,6 +55,8 @@ export interface UseStreamingMarkdownOptions extends StreamingParserOptions {
   immediate?: boolean;
   /** 输出速率配置 */
   outputRate?: OutputRate;
+  /** 流式渲染配置（动画等） */
+  streaming?: StreamingConfig;
 }
 
 /**
@@ -76,4 +119,6 @@ export interface StreamingMarkdownProps extends StreamingParserOptions {
   minUpdateInterval?: number;
   /** 是否自动开始输出（仅 source 模式） */
   autoStart?: boolean;
+  /** 流式渲染配置（动画等） */
+  streaming?: StreamingConfig;
 }
