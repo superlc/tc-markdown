@@ -69,11 +69,16 @@ export const Button: React.FC<ButtonProps> = ({ label, onClick }) => (
 const tableContent = `
 ### 表格测试
 
-| 概念 | 说明 |
-| ---- | ---- |
-| 实例 | 云端的虚拟计算资源 |
-| 云数据库 | 参考[价格页](https://cloud.tencent.com/price/) |
-| 云存储 | 高效安全的存储服务 |
+| 概念 | 说明 | 状态 |
+| ---- | ---- | ---- |
+| 云服务器 | 云端的虚拟计算资源 | 可用 |
+| 云数据库 | 提供 MySQL、MongoDB 等数据库服务 | 可用 |
+| 云存储 | 高效安全的对象存储服务 | 可用 |
+| 云函数 | 无服务器计算服务 | 可用 |
+| 容器服务 | Kubernetes 容器编排服务 | 可用 |
+| CDN | 内容分发网络加速 | 可用 |
+| 负载均衡 | 流量分发与高可用 | 可用 |
+| API 网关 | API 管理与发布 | 测试中 |
 `;
 
 const emphasisContent = `

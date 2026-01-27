@@ -6,12 +6,13 @@
 
 /**
  * Token 类型
- * 注意：emphasis、inline-code、link、image 不再缓冲，由 InlineCompleter 自动补全闭合标记
+ * 注意：emphasis、inline-code、link、image、table 不再缓冲
+ * - emphasis/inline-code/link/image 由 InlineCompleter 自动补全闭合标记
+ * - table 改为渐进式逐行显示
  */
 export type StreamTokenType =
   | 'text'
-  | 'html'
-  | 'table';
+  | 'html';
 
 /**
  * 流式缓冲状态
@@ -52,9 +53,10 @@ const STREAM_INCOMPLETE_REGEX = {
 
 /**
  * Token 识别器映射
- * 注意：移除了 list、emphasis、inline-code、link、image 识别器
+ * 注意：移除了 list、emphasis、inline-code、link、image、table 识别器
  * - list 由 streaming-parser 的 stripUncertainTailForDisplay 处理
  * - emphasis/inline-code/link/image 由 InlineCompleter 自动补全闭合标记
+ * - table 改为渐进式逐行显示，不再缓冲
  */
 const tokenRecognizers: TokenRecognizer[] = [
   {
@@ -106,41 +108,7 @@ function isInCodeBlock(text: string, isFinalChunk = false): boolean {
 }
 
 /**
- * 判断表格是否不完整
- */
-function isTableIncomplete(markdown: string): boolean {
-  if (markdown.includes('\n\n')) return false;
-
-  const lines = markdown.split('\n');
-  if (lines.length <= 1) return true;
-
-  const [header, separator] = lines;
-  const trimmedHeader = header.trim();
-  if (!/^\|.*\|$/.test(trimmedHeader)) return false;
-
-  const trimmedSeparator = separator.trim();
-  const columns = trimmedSeparator
-    .split('|')
-    .map((col) => col.trim())
-    .filter(Boolean);
-
-  const separatorRegex = /^:?-+:?$/;
-  return columns.every((col, index) =>
-    index === columns.length - 1
-      ? col === ':' || separatorRegex.test(col)
-      : separatorRegex.test(col)
-  );
-}
-
-// 添加表格识别器
-tokenRecognizers.push({
-  tokenType: 'table',
-  isStartOfToken: (pending) => pending.startsWith('|'),
-  isStreamingValid: isTableIncomplete,
-});
-
-/**
- * 判断是否是不确定的行级前缀（列表、标题、引用等）
+ * 判断是否是不确定的行级前缀（列表、标题、引用、表格行等）
  * 这些前缀后面没有实际内容时，不应该显示
  */
 function isUncertainLinePrefix(line: string): boolean {
@@ -156,6 +124,20 @@ function isUncertainLinePrefix(line: string): boolean {
   if (/^\s{0,3}#{1,6}\s*$/.test(line)) return true;
   // 围栏代码前缀
   if (/^\s{0,3}(`{3,}|~{3,})\s*\w*\s*$/.test(line)) return true;
+
+  // 表格行前缀（渐进式渲染）：
+  // 新行刚开始时通常会先输出 "|" 或 "|   "，这会被解析成一个“空行/空表格行”并短暂闪现。
+  // 这里将“明显未成型的表格行”视为不确定前缀，直到它包含足够的分隔符/内容再显示。
+  const trimmed = line.trim();
+  if (trimmed.startsWith('|')) {
+    // 只有管道和空白："|" / "||" / "| |" / "|   |   |" 等
+    if (trimmed.replace(/\|/g, '').trim() === '') return true;
+
+    const pipeCount = (trimmed.match(/\|/g) || []).length;
+    // 只有一个 "|"（新行刚开始，还没出现下一个分隔）
+    if (pipeCount < 2) return true;
+  }
+
   return false;
 }
 

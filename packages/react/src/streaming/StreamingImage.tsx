@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useLayoutEffect, memo, CSSProperties } from 'react';
+import { useState, useCallback, useRef, useLayoutEffect, memo, CSSProperties } from 'react';
 import type { FC, ImgHTMLAttributes } from 'react';
 
 /**
@@ -12,6 +12,23 @@ const HIDE_SKELETON_DELAY = 16;
 const PLACEHOLDER_PREFIX = 'data:image/svg+xml,';
 
 /**
+ * 注入全局 shimmer 动画样式（只执行一次）
+ */
+let shimmerStyleInjected = false;
+const injectShimmerStyle = () => {
+  if (shimmerStyleInjected || typeof document === 'undefined') return;
+  shimmerStyleInjected = true;
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes streaming-image-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+/**
  * 默认占位图样式 - 覆盖在图片上方
  */
 const SKELETON_STYLE: CSSProperties = {
@@ -23,6 +40,7 @@ const SKELETON_STYLE: CSSProperties = {
   backgroundColor: '#e8e8e8',
   backgroundImage: 'linear-gradient(90deg, #e8e8e8 0%, #f5f5f5 50%, #e8e8e8 100%)',
   backgroundSize: '200% 100%',
+  animation: 'streaming-image-shimmer 1.5s infinite',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -64,6 +82,8 @@ export const StreamingImage: FC<StreamingImageProps> = memo(({
   'data-height': dataHeight,
   ...props
 }) => {
+  // 注入全局 shimmer 动画样式
+  injectShimmerStyle();
   // 判断是否是占位图
   const isPlaceholder = src?.startsWith(PLACEHOLDER_PREFIX);
   
@@ -138,18 +158,9 @@ export const StreamingImage: FC<StreamingImageProps> = memo(({
       
       {/* Skeleton 覆盖层 - 图片加载完成后消失 */}
       {showSkeleton && (
-        <div className="streaming-image-skeleton" style={SKELETON_STYLE}>
+        <span style={SKELETON_STYLE}>
           <ImageIcon />
-          <style>{`
-            .streaming-image-skeleton {
-              animation: streaming-image-shimmer 1.5s infinite;
-            }
-            @keyframes streaming-image-shimmer {
-              0% { background-position: 200% 0; }
-              100% { background-position: -200% 0; }
-            }
-          `}</style>
-        </div>
+        </span>
       )}
     </span>
   );

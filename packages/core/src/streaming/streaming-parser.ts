@@ -178,6 +178,15 @@ export function createStreamingParser(
       if (/^\s{0,3}#{1,6}\s*$/.test(line)) return true;
       // 围栏代码前缀："```" 或 "~~~"（可带语言，但末尾还在这一行内时也可能不完整）
       if (/^\s{0,3}(`{3,}|~{3,})\s*\w*\s*$/.test(line)) return true;
+
+      // 表格行（兜底）：避免新行刚开始时 "|" 触发空行/空表格行闪现
+      const trimmed = line.trim();
+      if (trimmed.startsWith('|')) {
+        if (trimmed.replace(/\|/g, '').trim() === '') return true;
+        const pipeCount = (trimmed.match(/\|/g) || []).length;
+        if (pipeCount < 2) return true;
+      }
+
       return false;
     };
 
