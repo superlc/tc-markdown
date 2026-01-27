@@ -4,7 +4,7 @@
 TBD - created by archiving change add-streaming-render. Update Purpose after archive.
 ## Requirements
 ### Requirement: 增量解析器（高性能）
-系统 SHALL 提供 `createStreamingParser` 工厂函数，返回支持高性能增量解析的解析器实例。解析器采用分块缓存策略，避免重复解析已稳定的内容块。
+系统 SHALL 提供 `createStreamingParser` 工厂函数，返回支持高性能增量解析的解析器实例。解析器采用分块缓存策略，避免重复解析已稳定的内容块。行内强调标记（粗体、斜体、行内代码）SHALL 逐字显示而非等待闭合后一次性显示。
 
 #### Scenario: 创建解析器
 - **GIVEN** 用户导入 `@tc/md-core`
@@ -54,7 +54,24 @@ TBD - created by archiving change add-streaming-render. Update Purpose after arc
 - **THEN** 返回性能统计信息
 - **AND** 包含 `{ totalAppends, cacheHits, cacheMisses, avgParseTime }`
 
----
+#### Scenario: 行内强调逐字显示
+- **GIVEN** 流式输入 `**我`
+- **WHEN** 解析器处理此内容
+- **THEN** 输出渲染为粗体的"我"
+- **AND** 后续追加 `是` 变为粗体的"我是"
+- **AND** 追加 `加强文字**` 后显示完整的粗体"我是加强文字"
+
+#### Scenario: 斜体逐字显示
+- **GIVEN** 流式输入 `*斜`
+- **WHEN** 解析器处理此内容
+- **THEN** 输出渲染为斜体的"斜"
+- **AND** 后续追加完成斜体效果
+
+#### Scenario: 行内代码逐字显示
+- **GIVEN** 流式输入 `` `code ``
+- **WHEN** 解析器处理此内容
+- **THEN** 输出渲染为行内代码的"code"
+- **AND** 后续追加完成代码效果
 
 ### Requirement: 块边界检测
 系统 SHALL 正确识别 Markdown 块级元素边界，用于分块解析和缓存。

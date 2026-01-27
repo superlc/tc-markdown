@@ -6,15 +6,14 @@
 
 /**
  * Token 类型
+ * 注意：emphasis 和 inline-code 不再缓冲，由 InlineCompleter 自动补全闭合标记
  */
 export type StreamTokenType =
   | 'text'
   | 'link'
   | 'image'
   | 'html'
-  | 'emphasis'
-  | 'table'
-  | 'inline-code';
+  | 'table';
 
 /**
  * 流式缓冲状态
@@ -47,8 +46,7 @@ interface TokenRecognizer {
  * 
  * 设计原则：
  * - 链接/图片：只缓冲 `[` 到 `](` 部分，一旦 URL 开始就立即显示，文字逐步更新
- * - 强调：缓冲到配对标记出现
- * - 行内代码：缓冲到闭合反引号
+ * - 强调/行内代码：不缓冲，由 InlineCompleter 自动补全闭合标记实现逐字显示
  */
 const STREAM_INCOMPLETE_REGEX = {
   // 图片：只缓冲 `![` 开始直到 `](url)` 完整
@@ -67,13 +65,13 @@ const STREAM_INCOMPLETE_REGEX = {
     /^\[[^\]]*\]\($/,  // `[xxx](` 等待 URL
   ],
   html: [/^<\/$/, /^<\/?[a-zA-Z][a-zA-Z0-9-]{0,100}[^>\r\n]{0,1000}$/],
-  emphasis: [/^(\*{1,3}|_{1,3})(?!\s)(?!.*\1$)[^\r\n]{0,1000}$/],
-  'inline-code': [/^`[^`\r\n]{0,300}$/],
 } as const;
 
 /**
  * Token 识别器映射
- * 注意：移除了 list 识别器，列表前缀由 streaming-parser 的 stripUncertainTailForDisplay 处理
+ * 注意：移除了 list、emphasis、inline-code 识别器
+ * - list 由 streaming-parser 的 stripUncertainTailForDisplay 处理
+ * - emphasis/inline-code 由 InlineCompleter 自动补全闭合标记
  */
 const tokenRecognizers: TokenRecognizer[] = [
   {
@@ -93,18 +91,6 @@ const tokenRecognizers: TokenRecognizer[] = [
     isStartOfToken: (pending) => pending.startsWith('<'),
     isStreamingValid: (pending) =>
       STREAM_INCOMPLETE_REGEX.html.some((re) => re.test(pending)),
-  },
-  {
-    tokenType: 'emphasis',
-    isStartOfToken: (pending) => pending.startsWith('*') || pending.startsWith('_'),
-    isStreamingValid: (pending) =>
-      STREAM_INCOMPLETE_REGEX.emphasis.some((re) => re.test(pending)),
-  },
-  {
-    tokenType: 'inline-code',
-    isStartOfToken: (pending) => pending.startsWith('`'),
-    isStreamingValid: (pending) =>
-      STREAM_INCOMPLETE_REGEX['inline-code'].some((re) => re.test(pending)),
   },
 ];
 
