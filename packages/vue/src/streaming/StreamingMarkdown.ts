@@ -16,6 +16,7 @@ import {
   type OutputRate,
 } from '@tc/md-core';
 import type { MarkdownComponents } from '../types';
+import { preloadKatexCss } from '../MathProvider';
 
 /**
  * 将 HAST 节点转换为 Vue VNode
@@ -109,14 +110,30 @@ export const StreamingMarkdown = defineComponent({
       type: Boolean,
       default: true,
     },
+    math: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   emits: ['complete', 'blockStable', 'progress'],
 
   setup(props, { emit }) {
+    // 启用数学公式时懒加载 KaTeX CSS
+    watch(
+      () => props.math,
+      (math) => {
+        if (math) {
+          preloadKatexCss();
+        }
+      },
+      { immediate: true }
+    );
+
     const parser = createStreamingParser({
       gfm: props.gfm,
       highlight: props.highlight,
+      math: props.math,
     });
     const controller = new OutputRateController(props.outputRate);
 

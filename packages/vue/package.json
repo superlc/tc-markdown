@@ -24,7 +24,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@tc/md-core": "workspace:*"
+    "@tc/md-core": "workspace:*",
+    "katex": "^0.16.28"
   },
   "peerDependencies": {
     "vue": ">=3.3.0"

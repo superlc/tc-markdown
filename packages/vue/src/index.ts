@@ -20,6 +20,9 @@ export type {
   StreamingMarkdownEmits,
 } from './streaming';
 
+// 数学公式支持
+export { preloadKatexCss, isKatexCssLoaded } from './MathProvider';
+
 // 重新导出 core 的类型
 export type {
   ProcessorOptions,

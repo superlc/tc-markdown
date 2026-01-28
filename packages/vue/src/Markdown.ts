@@ -1,7 +1,8 @@
-import { defineComponent, computed, h, type VNode, type PropType } from 'vue';
+import { defineComponent, computed, h, watch, type VNode, type PropType } from 'vue';
 import { parseToHast, type PluginConfig } from '@tc/md-core';
 import type { Root, Element, Text, Comment } from 'hast';
 import type { MarkdownComponents } from './types';
+import { preloadKatexCss } from './MathProvider';
 
 type HastNode = Root | Element | Text | Comment;
 
@@ -27,6 +28,10 @@ export const Markdown = defineComponent({
       type: Boolean,
       default: true,
     },
+    math: {
+      type: Boolean,
+      default: false,
+    },
     components: {
       type: Object as PropType<MarkdownComponents>,
       default: () => ({}),
@@ -41,6 +46,17 @@ export const Markdown = defineComponent({
     },
   },
   setup(props) {
+    // 启用数学公式时懒加载 KaTeX CSS
+    watch(
+      () => props.math,
+      (math) => {
+        if (math) {
+          preloadKatexCss();
+        }
+      },
+      { immediate: true }
+    );
+
     /**
      * 将 HAST 节点转换为 Vue VNode
      */
@@ -98,6 +114,7 @@ export const Markdown = defineComponent({
       const hast = parseToHast(props.content, {
         gfm: props.gfm,
         highlight: props.highlight,
+        math: props.math,
         remarkPlugins: props.remarkPlugins,
         rehypePlugins: props.rehypePlugins,
       });

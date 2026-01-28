@@ -133,9 +133,11 @@ importers:
     specifiers:
       '@tc/md-core': workspace:*
       '@types/hast': ^3.0.0
+      katex: ^0.16.28
       vue: ^3.4.0
     dependencies:
       '@tc/md-core': link:../core
+      katex: 0.16.28
     devDependencies:
       '@types/hast': 3.0.4
       vue: 3.5.27
@@ -2040,7 +2042,7 @@ packages:
     dependencies:
       '@vue/compiler-ssr': 3.5.27
       '@vue/shared': 3.5.27
-      vue: 3.5.27
+      vue: 3.5.27_typescript@5.9.3
     dev: true
 
   /@vue/shared/3.5.27:

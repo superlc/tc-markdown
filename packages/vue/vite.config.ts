@@ -19,7 +19,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['vue', '@tc/md-core'],
+      external: ['vue', '@tc/md-core', /^katex/],
       output: {
         globals: {
           vue: 'Vue',
