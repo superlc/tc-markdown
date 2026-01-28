@@ -5,12 +5,12 @@ import { visit } from 'unist-util-visit';
  * 常见图片尺寸模式的正则表达式
  */
 const SIZE_PATTERNS = [
-  // placeholder.com: /300x200 或 /300
+  // placeholder.com: /300x200
   /\/(\d+)x(\d+)/,
-  // placeholder.com: /300 (正方形)
-  /\/(\d+)(?:[?#]|$)/,
-  // picsum.photos: /300/200
+  // picsum.photos: /300/200 (必须在正方形模式之前)
   /\/(\d+)\/(\d+)/,
+  // placeholder.com: /300 (正方形，放在最后避免误匹配)
+  /\/(\d+)(?:[?#]|$)/,
   // 查询参数: ?width=300&height=200 或 ?w=300&h=200
   /[?&](?:width|w)=(\d+)(?:&(?:height|h)=(\d+))?/i,
   // 查询参数: ?size=300x200
