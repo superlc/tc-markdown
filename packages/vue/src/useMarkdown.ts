@@ -83,6 +83,8 @@ export function useMarkdown(
     if (!md) return null;
 
     const hast = parseToHast(md, processorOptions);
-    return hastToVNode(hast, components);
+    const result = hastToVNode(hast, components);
+    // hastToVNode for root always returns VNode, not string
+    return result as VNode | null;
   });
 }

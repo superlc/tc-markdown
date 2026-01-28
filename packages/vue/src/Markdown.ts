@@ -82,6 +82,10 @@ export const Markdown = defineComponent({
           .map((child) => hastToVNode(child as HastNode, components))
           .filter((child): child is VNode | string => child !== null);
 
+        // 对于自定义组件使用 slot，对于原生 HTML 元素直接传递 children
+        if (typeof Component === 'string') {
+          return h(Component, nodeProps, childVNodes);
+        }
         return h(Component, nodeProps, () => childVNodes);
       }
 

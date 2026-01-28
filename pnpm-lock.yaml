@@ -132,10 +132,12 @@ importers:
   packages/vue:
     specifiers:
       '@tc/md-core': workspace:*
+      '@types/hast': ^3.0.0
       vue: ^3.4.0
     dependencies:
       '@tc/md-core': link:../core
     devDependencies:
+      '@types/hast': 3.0.4
       vue: 3.5.27
 
 packages:
@@ -1560,7 +1562,6 @@ packages:
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
     dependencies:
       '@types/unist': 3.0.3
-    dev: false
 
   /@types/katex/0.16.8:
     resolution: {integrity: sha512-trgaNyfU+Xh2Tc+ABIb44a5AYUpicB3uwirOioeOkNPPbmgRNtcWyDeeFRzjPZENO9Vq8gvVqfhaaXWLlevVwg==}
@@ -1620,7 +1621,6 @@ packages:
 
   /@types/unist/3.0.3:
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
-    dev: false
 
   /@types/uuid/9.0.8:
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
@@ -2040,7 +2040,7 @@ packages:
     dependencies:
       '@vue/compiler-ssr': 3.5.27
       '@vue/shared': 3.5.27
-      vue: 3.5.27_typescript@5.9.3
+      vue: 3.5.27
     dev: true
 
   /@vue/shared/3.5.27:

@@ -4,7 +4,7 @@ import { StreamingMarkdown } from '@tc/md-react';
 import '../styles.css';
 
 const meta: Meta<typeof StreamingMarkdown> = {
-  title: 'Streaming/基础示例',
+  title: 'React/基础示例',
   component: StreamingMarkdown,
   parameters: {
     layout: 'padded',
