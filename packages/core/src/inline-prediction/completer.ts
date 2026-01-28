@@ -66,6 +66,14 @@ export class InlineCompleter {
     const completions: Completion[] = [];
     const markerStack: MarkerState[] = [];
 
+    const isEscapedAt = (input: string, pos: number): boolean => {
+      let backslashes = 0;
+      for (let i = pos - 1; i >= 0 && input[i] === '\\'; i--) {
+        backslashes++;
+      }
+      return backslashes % 2 === 1;
+    };
+
     let i = 0;
     const len = text.length;
 
@@ -146,7 +154,19 @@ export class InlineCompleter {
     }
 
     // 根据栈中未闭合的标记生成补全
-    let completedText = text;
+    // 删除线特殊处理：当存在未闭合删除线且文本以单个 "~" 结尾时，
+    // 该 "~" 往往是闭合 "~~" 的一半。如果直接显示，会导致该帧把删除线回退成纯文本，产生闪现。
+    const hasOpenStrikethrough = markerStack.some((s) => s.type === 'strikethrough');
+    const shouldHideTrailingSingleTilde =
+      this.enabledTypes.has('strikethrough') &&
+      hasOpenStrikethrough &&
+      text.endsWith('~') &&
+      !text.endsWith('~~') &&
+      !isEscapedAt(text, text.length - 1);
+
+    const baseText = shouldHideTrailingSingleTilde ? text.slice(0, -1) : text;
+
+    let completedText = baseText;
     for (let j = markerStack.length - 1; j >= 0; j--) {
       const state = markerStack[j];
       const closeMarker = this.getCloseMarker(state);
@@ -166,7 +186,7 @@ export class InlineCompleter {
 
       // 特殊处理：如果 marker 正好在文本末尾（常见于 chunk 边界），
       // 直接补全闭合可能仍会短暂显示裸 marker。插入 ZWSP 让 parser 更倾向于生成节点。
-      const markerEndsAtTextEnd = state.position + state.marker.length === text.length;
+      const markerEndsAtTextEnd = state.position + state.marker.length === baseText.length;
       if (markerEndsAtTextEnd && (state.type === 'bold' || state.type === 'italic' || state.type === 'code' || state.type === 'strikethrough')) {
         completedText += '\u200B' + closeMarker;
       } else {
