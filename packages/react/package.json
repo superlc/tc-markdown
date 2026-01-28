@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "@tc/md-core": "workspace:*",
-    "hast-util-to-jsx-runtime": "^2.3.0"
+    "hast-util-to-jsx-runtime": "^2.3.0",
+    "katex": "^0.16.28"
   },
   "optionalDependencies": {
     "dompurify": "^3.0.0"

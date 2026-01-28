@@ -513,3 +513,10 @@
 .md-animation-text {
     color: inherit;
 }
+
+/* ========================================
+   KaTeX 错误样式覆盖
+   ======================================== */
+.katex-error {
+    color: inherit !important;
+}

@@ -19,7 +19,15 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@tc/md-core', 'hast-util-to-jsx-runtime'],
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        '@tc/md-core',
+        'hast-util-to-jsx-runtime',
+        'katex',
+        'katex/dist/katex.min.css',
+      ],
       output: {
         globals: {
           react: 'React',

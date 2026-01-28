@@ -9,6 +9,7 @@ import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { StreamingMarkdownProps } from './types';
 import { StreamingImage } from './StreamingImage';
+import { preloadKatexCss } from './MathProvider';
 
 /**
  * 稳定块渲染组件
@@ -58,6 +59,13 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
   autoStart = true,
   ...parserOptions
 }) => {
+  // 如果启用数学公式，懒加载 KaTeX CSS
+  useEffect(() => {
+    if (parserOptions.math) {
+      preloadKatexCss();
+    }
+  }, [parserOptions.math]);
+
   // 解析器实例
   const parserRef = useRef(createStreamingParser(parserOptions));
   // 速率控制器实例

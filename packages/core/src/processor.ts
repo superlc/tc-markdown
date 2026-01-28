@@ -1,8 +1,10 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import remarkRehype from 'remark-rehype';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeKatex from 'rehype-katex';
 import { rehypeImageSize } from './plugins/rehype-image-size';
 import type { ProcessorOptions } from './types';
 
@@ -19,7 +21,7 @@ import type { ProcessorOptions } from './types';
  * ```
  */
 export function createProcessor(options: ProcessorOptions = {}) {
-  const { gfm = true, highlight = true, remarkPlugins = [], rehypePlugins = [] } = options;
+  const { gfm = true, highlight = true, math = false, remarkPlugins = [], rehypePlugins = [] } = options;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let processor: any = unified().use(remarkParse);
@@ -27,6 +29,11 @@ export function createProcessor(options: ProcessorOptions = {}) {
   // 启用 GFM 扩展
   if (gfm) {
     processor = processor.use(remarkGfm);
+  }
+
+  // 启用数学公式解析
+  if (math) {
+    processor = processor.use(remarkMath);
   }
 
   // 添加自定义 remark 插件
@@ -42,6 +49,11 @@ export function createProcessor(options: ProcessorOptions = {}) {
     processor = processor.use(rehypeHighlight, { detect: true });
   }
 
+  // 启用数学公式渲染（KaTeX）
+  if (math) {
+    processor = processor.use(rehypeKatex);
+  }
+
   // 提取图片尺寸信息
   processor = processor.use(rehypeImageSize);
 
@@ -54,6 +66,6 @@ export function createProcessor(options: ProcessorOptions = {}) {
 }
 
 /**
- * 默认 processor 实例（启用 GFM 和代码高亮）
+ * 默认 processor 实例（启用 GFM 和代码高亮，不启用数学公式）
  */
 export const defaultProcessor = createProcessor();

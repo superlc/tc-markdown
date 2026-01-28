@@ -160,12 +160,12 @@ export function createStreamingParser(
   }
 
   /**
-   * 在解析前裁剪“末尾不确定的块级前缀”，用于 B 策略：宁可稍微积压也不闪。
+   * 在解析前裁剪"末尾不确定的块级前缀"，用于 B 策略：宁可稍微积压也不闪。
    * 典型例子：流式输出停在 "-" / "1." / ">" / "#" / "```" 这一行的中间。
    */
   function stripUncertainTailForDisplay(input: string): string {
     // 围栏代码（fenced code block）：以 "```" 或 "~~~" 开头的代码块围栏行
-    // 只在该行尚未“确认”（还没出现空格+内容或换行）时，暂不显示该行。
+    // 只在该行尚未"确认"（还没出现空格+内容或换行）时，暂不显示该行。
 
     const isUncertainLine = (line: string): boolean => {
       // 无序列表前缀："-" / "*" / "+"（可带空格）
@@ -190,23 +190,56 @@ export function createStreamingParser(
       return false;
     };
 
-    // 如果以 \n 结尾，最后一行是空；此时检查“上一行”是否是不确定前缀行
-    if (input.endsWith('\n')) {
-      const trimmedEnd = input.slice(0, -1);
+    // 检测未闭合的块级数学公式 $$...$$
+    // 查找最后一个 $$ 的位置，判断是否闭合
+    const stripUnclosedMathBlock = (text: string): string => {
+      // 查找所有 $$ 的位置
+      const mathDelimiter = '$$';
+      let lastIndex = 0;
+      let count = 0;
+      let lastOpenPos = -1;
+      
+      while (true) {
+        const pos = text.indexOf(mathDelimiter, lastIndex);
+        if (pos === -1) break;
+        count++;
+        if (count % 2 === 1) {
+          // 奇数次出现，是开始标记
+          lastOpenPos = pos;
+        } else {
+          // 偶数次出现，是结束标记
+          lastOpenPos = -1;
+        }
+        lastIndex = pos + mathDelimiter.length;
+      }
+      
+      // 如果有未闭合的 $$，截断到该位置之前
+      if (lastOpenPos !== -1) {
+        return text.slice(0, lastOpenPos);
+      }
+      return text;
+    };
+
+    // 先处理未闭合的数学公式块
+    let result = stripUnclosedMathBlock(input);
+
+    // 如果以 \n 结尾，最后一行是空；此时检查"上一行"是否是不确定前缀行
+    if (result.endsWith('\n')) {
+      const trimmedEnd = result.slice(0, -1);
       const lastNl = trimmedEnd.lastIndexOf('\n');
       const prevLine = lastNl >= 0 ? trimmedEnd.slice(lastNl + 1) : trimmedEnd;
       if (isUncertainLine(prevLine)) {
-        return lastNl >= 0 ? input.slice(0, lastNl + 1) : '';
+        return lastNl >= 0 ? result.slice(0, lastNl + 1) : '';
       }
-      return input;
+      return result;
     }
 
-    const lastNl = input.lastIndexOf('\n');
-    const lastLine = lastNl >= 0 ? input.slice(lastNl + 1) : input;
+    const lastNl = result.lastIndexOf('\n');
+    const lastLine = lastNl >= 0 ? result.slice(lastNl + 1) : result;
     if (isUncertainLine(lastLine)) {
-      return lastNl >= 0 ? input.slice(0, lastNl + 1) : '';
+      return lastNl >= 0 ? result.slice(0, lastNl + 1) : '';
     }
-    return input;
+    return result;
   }
 
   return {

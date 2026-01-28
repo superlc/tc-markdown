@@ -142,29 +142,62 @@ function isUncertainLinePrefix(line: string): boolean {
 }
 
 /**
+ * 检测并截断未闭合的块级数学公式 $$...$$
+ */
+function stripUnclosedMathBlock(text: string): string {
+  const mathDelimiter = '$$';
+  let lastIndex = 0;
+  let count = 0;
+  let lastOpenPos = -1;
+  
+  while (true) {
+    const pos = text.indexOf(mathDelimiter, lastIndex);
+    if (pos === -1) break;
+    count++;
+    if (count % 2 === 1) {
+      // 奇数次出现，是开始标记
+      lastOpenPos = pos;
+    } else {
+      // 偶数次出现，是结束标记
+      lastOpenPos = -1;
+    }
+    lastIndex = pos + mathDelimiter.length;
+  }
+  
+  // 如果有未闭合的 $$，截断到该位置之前
+  if (lastOpenPos !== -1) {
+    return text.slice(0, lastOpenPos);
+  }
+  return text;
+}
+
+/**
  * 裁剪末尾不确定的行级前缀
  */
 function stripUncertainTail(input: string): string {
   if (!input) return input;
   
+  // 先处理未闭合的数学公式块
+  let result = stripUnclosedMathBlock(input);
+  
   // 如果以 \n 结尾，检查上一行
-  if (input.endsWith('\n')) {
-    const trimmedEnd = input.slice(0, -1);
+  if (result.endsWith('\n')) {
+    const trimmedEnd = result.slice(0, -1);
     const lastNl = trimmedEnd.lastIndexOf('\n');
     const prevLine = lastNl >= 0 ? trimmedEnd.slice(lastNl + 1) : trimmedEnd;
     if (isUncertainLinePrefix(prevLine)) {
-      return lastNl >= 0 ? input.slice(0, lastNl + 1) : '';
+      return lastNl >= 0 ? result.slice(0, lastNl + 1) : '';
     }
-    return input;
+    return result;
   }
   
   // 检查最后一行
-  const lastNl = input.lastIndexOf('\n');
-  const lastLine = lastNl >= 0 ? input.slice(lastNl + 1) : input;
+  const lastNl = result.lastIndexOf('\n');
+  const lastLine = lastNl >= 0 ? result.slice(lastNl + 1) : result;
   if (isUncertainLinePrefix(lastLine)) {
-    return lastNl >= 0 ? input.slice(0, lastNl + 1) : '';
+    return lastNl >= 0 ? result.slice(0, lastNl + 1) : '';
   }
-  return input;
+  return result;
 }
 
 /**

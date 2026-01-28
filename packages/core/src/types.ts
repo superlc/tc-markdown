@@ -16,6 +16,8 @@ export interface ProcessorOptions {
   gfm?: boolean;
   /** 启用代码高亮，默认 true */
   highlight?: boolean;
+  /** 启用数学公式渲染（LaTeX 语法），默认 false */
+  math?: boolean;
   /** 自定义 remark 插件 */
   remarkPlugins?: PluginConfig[];
   /** 自定义 rehype 插件 */
