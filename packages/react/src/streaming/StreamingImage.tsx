@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useLayoutEffect, memo, CSSProperties } from 'react';
+import { useState, useCallback, useRef, useLayoutEffect, memo } from 'react';
 import type { FC, ImgHTMLAttributes } from 'react';
 
 /**
@@ -12,51 +12,13 @@ const HIDE_SKELETON_DELAY = 16;
 const PLACEHOLDER_PREFIX = 'data:image/svg+xml,';
 
 /**
- * 注入全局 shimmer 动画样式（只执行一次）
- */
-let shimmerStyleInjected = false;
-const injectShimmerStyle = () => {
-  if (shimmerStyleInjected || typeof document === 'undefined') return;
-  shimmerStyleInjected = true;
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes streaming-image-shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-  `;
-  document.head.appendChild(style);
-};
-
-/**
- * 默认占位图样式 - 覆盖在图片上方
- */
-const SKELETON_STYLE: CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: '#e8e8e8',
-  backgroundImage: 'linear-gradient(90deg, #e8e8e8 0%, #f5f5f5 50%, #e8e8e8 100%)',
-  backgroundSize: '200% 100%',
-  animation: 'streaming-image-shimmer 1.5s infinite',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '6px',
-  zIndex: 1,
-  pointerEvents: 'none',
-};
-
-/**
- * 图片图标 SVG
+ * 图片图标 SVG（使用 CSS 变量控制颜色）
  */
 const ImageIcon = () => (
   <svg width="48" height="36" viewBox="0 0 48 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="48" height="36" rx="3" fill="#bdbdbd"/>
-    <circle cx="12" cy="10" r="5" fill="#9e9e9e"/>
-    <path d="M0 36 L0 24 L16 16 L28 26 L48 12 L48 36 Z" fill="#9e9e9e"/>
+    <rect x="0" y="0" width="48" height="36" rx="3" className="md-image-skeleton-icon"/>
+    <circle cx="12" cy="10" r="5" className="md-image-skeleton-icon-detail"/>
+    <path d="M0 36 L0 24 L16 16 L28 26 L48 12 L48 36 Z" className="md-image-skeleton-icon-detail"/>
   </svg>
 );
 
@@ -77,13 +39,11 @@ interface StreamingImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 export const StreamingImage: FC<StreamingImageProps> = memo(({
   src,
   alt,
-  style,
+  className,
   'data-width': dataWidth,
   'data-height': dataHeight,
   ...props
 }) => {
-  // 注入全局 shimmer 动画样式
-  injectShimmerStyle();
   // 判断是否是占位图
   const isPlaceholder = src?.startsWith(PLACEHOLDER_PREFIX);
   
@@ -91,8 +51,8 @@ export const StreamingImage: FC<StreamingImageProps> = memo(({
   const realSrc = isPlaceholder ? undefined : src;
 
   // 解析尺寸
-  const width = dataWidth ? Number(dataWidth) : undefined;
-  const height = dataHeight ? Number(dataHeight) : undefined;
+  const width = dataWidth ? Number(dataWidth) : 200;
+  const height = dataHeight ? Number(dataHeight) : 120;
   
   // 是否显示 skeleton（始终初始显示，避免组件重建时闪烁）
   const [showSkeleton, setShowSkeleton] = useState(true);
@@ -126,19 +86,11 @@ export const StreamingImage: FC<StreamingImageProps> = memo(({
     }, HIDE_SKELETON_DELAY);
   }, []);
 
-  // 容器样式
-  const containerStyle: CSSProperties = {
-    position: 'relative',
-    display: 'block',
-    width: width || 200,
-    height: height || 120,
-    borderRadius: '6px',
-    overflow: 'hidden',
-    ...style,
-  };
-
   return (
-    <span style={containerStyle}>
+    <span
+      className={`md-image-container ${className || ''}`}
+      style={{ width, height }}
+    >
       {/* 真实图片 - 始终存在（当有真实 src 时） */}
       {realSrc && (
         <img
@@ -146,19 +98,14 @@ export const StreamingImage: FC<StreamingImageProps> = memo(({
           src={realSrc}
           alt={alt}
           onLoad={handleImageLoad}
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
+          className="md-image"
           {...props}
         />
       )}
       
       {/* Skeleton 覆盖层 - 图片加载完成后消失 */}
       {showSkeleton && (
-        <span style={SKELETON_STYLE}>
+        <span className="md-image-skeleton">
           <ImageIcon />
         </span>
       )}

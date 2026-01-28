@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, memo } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 
 export interface AnimationConfig {
   /**
@@ -46,18 +46,17 @@ const AnimationText = memo<AnimationTextProps>((props) => {
     prevTextRef.current = text;
   }, [text]);
 
-  const animationStyle = useMemo(
-    () => ({
-      animation: `md-fade-in ${fadeDuration}ms ${easing} forwards`,
-      color: 'inherit',
-    }),
-    [fadeDuration, easing]
-  );
+  // 动态动画属性（运行时配置）
+  const animationValue = `md-fade-in ${fadeDuration}ms ${easing} forwards`;
 
   return (
     <>
       {chunks.map((chunk, index) => (
-        <span style={animationStyle} key={`animation-text-${index}`}>
+        <span
+          className="md-animation-text"
+          style={{ animation: animationValue }}
+          key={`animation-text-${index}`}
+        >
           {chunk}
         </span>
       ))}
@@ -68,17 +67,3 @@ const AnimationText = memo<AnimationTextProps>((props) => {
 AnimationText.displayName = 'AnimationText';
 
 export default AnimationText;
-
-/**
- * CSS keyframes（需要注入到页面）
- */
-export const ANIMATION_KEYFRAMES = `
-@keyframes md-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-`;

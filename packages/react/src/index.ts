@@ -13,7 +13,6 @@ export {
   StreamingMarkdown,
   StreamingImage,
   AnimationText,
-  ANIMATION_KEYFRAMES,
 } from './streaming';
 export type {
   UseStreamingMarkdownOptions,

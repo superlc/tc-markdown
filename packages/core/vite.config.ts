@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { copyFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
@@ -8,6 +9,15 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       outDir: 'dist',
     }),
+    {
+      name: 'copy-css',
+      closeBundle() {
+        copyFileSync(
+          resolve(__dirname, 'src/styles/markdown.css'),
+          resolve(__dirname, 'dist/styles.css')
+        );
+      },
+    },
   ],
   build: {
     lib: {
