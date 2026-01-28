@@ -23,7 +23,7 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        '@tc/md-core',
+        '@superlc/md-core',
         'hast-util-to-jsx-runtime',
         'katex',
         'katex/dist/katex.min.css',

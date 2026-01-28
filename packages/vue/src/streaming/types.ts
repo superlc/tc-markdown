@@ -1,5 +1,5 @@
 import type { VNode, Ref } from 'vue';
-import type { StreamingParserOptions, ParserStats, BlockInfo, OutputRate, OutputRateStatus } from '@tc/md-core';
+import type { StreamingParserOptions, ParserStats, BlockInfo, OutputRate, OutputRateStatus } from '@superlc/md-core';
 import type { MarkdownComponents } from '../types';
 
 /**

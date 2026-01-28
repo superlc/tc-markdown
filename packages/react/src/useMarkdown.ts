@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { parseToHast } from '@tc/md-core';
+import { parseToHast } from '@superlc/md-core';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { UseMarkdownOptions } from './types';

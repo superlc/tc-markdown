@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { ProcessorOptions } from '@tc/md-core';
+import type { ProcessorOptions } from '@superlc/md-core';
 
 /**
  * 自定义组件映射表

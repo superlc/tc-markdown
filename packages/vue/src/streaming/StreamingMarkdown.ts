@@ -14,7 +14,7 @@ import {
   type Root,
   type Element,
   type OutputRate,
-} from '@tc/md-core';
+} from '@superlc/md-core';
 import type { MarkdownComponents } from '../types';
 import { preloadKatexCss } from '../MathProvider';
 

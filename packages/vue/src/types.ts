@@ -1,8 +1,8 @@
 import type { Component } from 'vue';
-import type { ProcessorOptions } from '@tc/md-core';
+import type { ProcessorOptions } from '@superlc/md-core';
 
 // 从 core 重新导出
-export type { PluginConfig } from '@tc/md-core';
+export type { PluginConfig } from '@superlc/md-core';
 
 /**
  * 自定义组件映射表

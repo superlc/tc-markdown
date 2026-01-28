@@ -1,6 +1,6 @@
 /**
- * @tc/md-vue
- * 基于 @tc/md-core 的 Vue 3 Markdown 渲染组件
+ * @superlc/md-vue
+ * 基于 @superlc/md-core 的 Vue 3 Markdown 渲染组件
  */
 
 import type { App } from 'vue';
@@ -35,7 +35,7 @@ export type {
   OutputRateStatus,
   InlineType,
   InlinePredictionOptions,
-} from '@tc/md-core';
+} from '@superlc/md-core';
 
 /**
  * Vue 插件安装函数

@@ -107,7 +107,7 @@ importers:
 
   packages/react:
     specifiers:
-      '@tc/md-core': workspace:*
+      '@superlc/md-core': workspace:*
       '@types/dompurify': ^3.0.0
       '@types/react': ^18.2.0
       '@types/react-dom': ^18.2.0
@@ -117,7 +117,7 @@ importers:
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
-      '@tc/md-core': link:../core
+      '@superlc/md-core': link:../core
       hast-util-to-jsx-runtime: 2.3.6
       katex: 0.16.28
     optionalDependencies:
@@ -131,12 +131,12 @@ importers:
 
   packages/vue:
     specifiers:
-      '@tc/md-core': workspace:*
+      '@superlc/md-core': workspace:*
       '@types/hast': ^3.0.0
       katex: ^0.16.28
       vue: ^3.4.0
     dependencies:
-      '@tc/md-core': link:../core
+      '@superlc/md-core': link:../core
       katex: 0.16.28
     devDependencies:
       '@types/hast': 3.0.4

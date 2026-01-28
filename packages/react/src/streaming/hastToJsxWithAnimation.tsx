@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Element } from '@tc/md-core';
+import type { Element } from '@superlc/md-core';
 import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import AnimationText from './AnimationText';

@@ -4,7 +4,7 @@ import {
   createStreamingParser,
   OutputRateController,
   type BlockInfo,
-} from '@tc/md-core';
+} from '@superlc/md-core';
 import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { StreamingMarkdownProps } from './types';

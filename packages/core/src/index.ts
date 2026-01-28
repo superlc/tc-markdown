@@ -1,5 +1,5 @@
 /**
- * @tc/md-core
+ * @superlc/md-core
  * 基于 unified 的 Markdown 解析核心库
  */
 

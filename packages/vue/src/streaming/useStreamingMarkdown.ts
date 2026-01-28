@@ -5,7 +5,7 @@ import {
   type Root,
   type Element,
   type OutputRateStatus,
-} from '@tc/md-core';
+} from '@superlc/md-core';
 import type { UseStreamingMarkdownOptions, UseStreamingMarkdownResult } from './types';
 import type { MarkdownComponents } from '../types';
 

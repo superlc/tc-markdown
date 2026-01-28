@@ -1,5 +1,5 @@
 import { computed, h, type VNode, type ComputedRef } from 'vue';
-import { parseToHast } from '@tc/md-core';
+import { parseToHast } from '@superlc/md-core';
 import type { Root, Element, Text, Comment } from 'hast';
 import type { UseMarkdownOptions, MarkdownComponents } from './types';
 
@@ -61,7 +61,7 @@ function hastToVNode(node: HastNode, components: MarkdownComponents = {}): VNode
  * ```vue
  * <script setup>
  * import { ref } from 'vue';
- * import { useMarkdown } from '@tc/md-vue';
+ * import { useMarkdown } from '@superlc/md-vue';
  * 
  * const content = ref('# Hello World');
  * const vnode = useMarkdown(() => content.value);

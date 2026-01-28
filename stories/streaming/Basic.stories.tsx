@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { StreamingMarkdown } from '@tc/md-react';
+import { StreamingMarkdown } from '@superlc/md-react';
 import '../styles.css';
 
 const meta: Meta<typeof StreamingMarkdown> = {

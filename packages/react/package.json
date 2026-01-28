@@ -1,7 +1,7 @@
 {
-  "name": "@tc/md-react",
+  "name": "@superlc/md-react",
   "version": "0.1.0",
-  "description": "基于 @tc/md-core 的 React Markdown 渲染组件",
+  "description": "基于 @superlc/md-core 的 React Markdown 渲染组件",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -12,7 +12,7 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
-    "./styles.css": "@tc/md-core/styles.css"
+    "./styles.css": "@superlc/md-core/styles.css"
   },
   "files": [
     "dist"
@@ -24,7 +24,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@tc/md-core": "workspace:*",
+    "@superlc/md-core": "workspace:*",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "katex": "^0.16.28"
   },

@@ -7,9 +7,9 @@ export default defineConfig({
   plugins: [react(), vue()],
   resolve: {
     alias: {
-      '@tc/md-core': resolve(__dirname, 'packages/core/src'),
-      '@tc/md-react': resolve(__dirname, 'packages/react/src'),
-      '@tc/md-vue': resolve(__dirname, 'packages/vue/src'),
+      '@superlc/md-core': resolve(__dirname, 'packages/core/src'),
+      '@superlc/md-react': resolve(__dirname, 'packages/react/src'),
+      '@superlc/md-vue': resolve(__dirname, 'packages/vue/src'),
     },
   },
   test: {

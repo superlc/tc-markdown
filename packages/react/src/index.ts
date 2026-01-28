@@ -1,6 +1,6 @@
 /**
- * @tc/md-react
- * 基于 @tc/md-core 的 React Markdown 渲染组件
+ * @superlc/md-react
+ * 基于 @superlc/md-core 的 React Markdown 渲染组件
  */
 
 export { Markdown } from './Markdown';
@@ -38,4 +38,4 @@ export type {
   OutputRateStatus,
   InlineType,
   InlinePredictionOptions,
-} from '@tc/md-core';
+} from '@superlc/md-core';

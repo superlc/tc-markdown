@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { VueRenderer } from '../components/VueRenderer';
-import { Markdown, StreamingMarkdown } from '@tc/md-vue';
+import { Markdown, StreamingMarkdown } from '@superlc/md-vue';
 import '../styles.css';
 
 const meta: Meta<typeof VueRenderer> = {

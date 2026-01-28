@@ -3,7 +3,7 @@
  * 可选依赖 DOMPurify，未安装时跳过净化
  */
 
-import type { Element, Root } from '@tc/md-core';
+import type { Element, Root } from '@superlc/md-core';
 
 export interface SanitizeConfig {
   /** DOMPurify 配置 */

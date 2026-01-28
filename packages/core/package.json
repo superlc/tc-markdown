@@ -1,5 +1,5 @@
 {
-  "name": "@tc/md-core",
+  "name": "@superlc/md-core",
   "version": "0.1.0",
   "description": "基于 unified 的 Markdown 解析核心库",
   "type": "module",

@@ -1,5 +1,5 @@
 import { defineComponent, computed, h, watch, type VNode, type PropType } from 'vue';
-import { parseToHast, type PluginConfig } from '@tc/md-core';
+import { parseToHast, type PluginConfig } from '@superlc/md-core';
 import type { Root, Element, Text, Comment } from 'hast';
 import type { MarkdownComponents } from './types';
 import { preloadKatexCss } from './MathProvider';
