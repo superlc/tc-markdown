@@ -449,11 +449,11 @@
    ======================================== */
 @keyframes md-image-shimmer {
     0% {
-        background-position: 200% 0;
+        background-position: -200% 0;
     }
 
     100% {
-        background-position: -200% 0;
+        background-position: 200% 0;
     }
 }
 
@@ -480,7 +480,7 @@
     background-color: var(--md-skeleton-bg);
     background-image: linear-gradient(90deg, var(--md-skeleton-bg) 0%, var(--md-skeleton-shine) 50%, var(--md-skeleton-bg) 100%);
     background-size: 200% 100%;
-    animation: md-image-shimmer 1.5s infinite;
+    animation: md-image-shimmer 1.5s linear infinite;
     display: flex;
     align-items: center;
     justify-content: center;
