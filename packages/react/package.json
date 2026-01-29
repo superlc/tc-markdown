@@ -1,6 +1,6 @@
 {
   "name": "@superlc/md-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "基于 @superlc/md-core 的 React Markdown 渲染组件",
   "type": "module",
   "main": "./dist/index.cjs",
