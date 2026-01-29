@@ -70,6 +70,8 @@ export interface StreamingMarkdownProps extends StreamingParserOptions {
   minUpdateInterval?: number;
   /** 是否自动开始输出（仅 source 模式） */
   autoStart?: boolean;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
 }
 
 /**
@@ -82,4 +84,6 @@ export interface StreamingMarkdownEmits {
   (e: 'blockStable', block: BlockInfo): void;
   /** 进度变化事件 */
   (e: 'progress', progress: number): void;
+  /** 代码复制事件 */
+  (e: 'codeCopy', code: string): void;
 }

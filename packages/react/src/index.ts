@@ -5,6 +5,8 @@
 
 export { Markdown } from './Markdown';
 export { useMarkdown } from './useMarkdown';
+export { CodeBlock } from './components';
+export type { CodeBlockProps } from './components';
 export type { MarkdownProps, MarkdownComponents, UseMarkdownOptions } from './types';
 
 // 流式渲染

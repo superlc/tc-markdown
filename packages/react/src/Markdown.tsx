@@ -1,6 +1,10 @@
 import type { FC } from 'react';
-import { useMarkdown } from './useMarkdown';
+import { useMemo } from 'react';
+import { parseToHast } from '@superlc/md-core';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import type { MarkdownProps } from './types';
+import { CodeBlock } from './components/CodeBlock';
 
 /**
  * React Markdown 渲染组件
@@ -31,9 +35,35 @@ export const Markdown: FC<MarkdownProps> = ({
   children,
   components,
   className,
+  copyButton = true,
+  onCodeCopy,
   ...processorOptions
 }) => {
-  const element = useMarkdown(children, { components, ...processorOptions });
+  const element = useMemo(() => {
+    if (!children) return null;
+
+    const hast = parseToHast(children, processorOptions);
+
+    // 创建内置 CodeBlock 组件
+    const PreComponent = copyButton
+      ? (props: Record<string, unknown>) => (
+          <CodeBlock showCopyButton={copyButton} onCopy={onCodeCopy} {...props} />
+        )
+      : undefined;
+
+    // 合并组件，用户自定义组件优先
+    const mergedComponents = {
+      ...(PreComponent ? { pre: PreComponent } : {}),
+      ...components,
+    } as Record<string, unknown>;
+
+    return toJsxRuntime(hast, {
+      Fragment,
+      jsx,
+      jsxs,
+      components: mergedComponents,
+    });
+  }, [children, components, copyButton, onCodeCopy, processorOptions]);
 
   return <div className={className}>{element}</div>;
 };

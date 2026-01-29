@@ -10,6 +10,7 @@ import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import type { StreamingMarkdownProps } from './types';
 import { StreamingImage } from './StreamingImage';
 import { preloadKatexCss } from './MathProvider';
+import { CodeBlock } from '../components/CodeBlock';
 
 /**
  * 稳定块渲染组件
@@ -57,6 +58,8 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
   className,
   minUpdateInterval = 16,
   autoStart = true,
+  copyButton = true,
+  onCodeCopy,
   ...parserOptions
 }) => {
   // 如果启用数学公式，懒加载 KaTeX CSS
@@ -219,20 +222,36 @@ export const StreamingMarkdown: FC<StreamingMarkdownProps> = ({
 
   // 渲染块
   const renderedBlocks = useMemo(() => {
-    // 合并默认图片组件与用户自定义组件
-    const mergedComponents = {
-      img: StreamingImage,
-      ...components,
-    } as Components;
+    // 创建带复制功能的 CodeBlock 组件（仅在稳定块显示按钮）
+    const createPreComponent = (block: BlockInfo) => {
+      if (!copyButton) return undefined;
+      return (props: Record<string, unknown>) => (
+        <CodeBlock 
+          showCopyButton={block.stable && copyButton} 
+          onCopy={onCodeCopy} 
+          {...props} 
+        />
+      );
+    };
 
-    return state.blocks.map((block) => (
-      <StableBlock
-        key={block.key}
-        block={block}
-        components={mergedComponents}
-      />
-    ));
-  }, [state.blocks, components]);
+    // 合并默认图片组件与用户自定义组件
+    return state.blocks.map((block) => {
+      const PreComponent = createPreComponent(block);
+      const mergedComponents = {
+        img: StreamingImage,
+        ...(PreComponent ? { pre: PreComponent } : {}),
+        ...components,
+      } as Components;
+
+      return (
+        <StableBlock
+          key={block.key}
+          block={block}
+          components={mergedComponents}
+        />
+      );
+    });
+  }, [state.blocks, components, copyButton, onCodeCopy]);
 
   return (
     <div className={className} data-streaming={!isStreamComplete}>

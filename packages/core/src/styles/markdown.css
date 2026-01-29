@@ -515,6 +515,84 @@
 }
 
 /* ========================================
+   代码块复制按钮
+   ======================================== */
+:root,
+.md-light {
+    --md-copy-button-bg: rgba(0, 0, 0, 0.05);
+    --md-copy-button-bg-hover: rgba(0, 0, 0, 0.1);
+    --md-copy-button-color: var(--md-color-text-muted);
+    --md-copy-button-color-hover: var(--md-color-text);
+    --md-copy-button-success: #22c55e;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.md-light) {
+        --md-copy-button-bg: rgba(255, 255, 255, 0.1);
+        --md-copy-button-bg-hover: rgba(255, 255, 255, 0.2);
+        --md-copy-button-color: var(--md-color-text-muted);
+        --md-copy-button-color-hover: var(--md-color-text);
+        --md-copy-button-success: #22c55e;
+    }
+}
+
+.md-dark {
+    --md-copy-button-bg: rgba(255, 255, 255, 0.1);
+    --md-copy-button-bg-hover: rgba(255, 255, 255, 0.2);
+    --md-copy-button-color: var(--md-color-text-muted);
+    --md-copy-button-color-hover: var(--md-color-text);
+    --md-copy-button-success: #22c55e;
+}
+
+.md-code-block-wrapper {
+    position: relative;
+}
+
+.md-code-block-wrapper pre {
+    margin: 0;
+}
+
+.md-copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--md-radius-sm);
+    background-color: transparent;
+    color: var(--md-copy-button-color);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.md-copy-button:hover {
+    opacity: 1;
+}
+
+.md-copy-button:active {
+    transform: scale(0.95);
+}
+
+.md-copy-button--copied {
+    color: var(--md-copy-button-success);
+}
+
+.md-copy-button--copied:hover {
+    color: var(--md-copy-button-success);
+}
+
+.md-copy-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ========================================
    KaTeX 错误样式覆盖
    ======================================== */
 .katex-error {

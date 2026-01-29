@@ -54,6 +54,8 @@ export interface MarkdownProps extends ProcessorOptions {
   components?: MarkdownComponents;
   /** 容器 class */
   class?: string;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
 }
 
 /**
@@ -62,4 +64,6 @@ export interface MarkdownProps extends ProcessorOptions {
 export interface UseMarkdownOptions extends ProcessorOptions {
   /** 自定义组件映射 */
   components?: MarkdownComponents;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
 }

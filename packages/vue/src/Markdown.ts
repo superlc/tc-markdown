@@ -3,6 +3,7 @@ import { parseToHast, type PluginConfig } from '@superlc/md-core';
 import type { Root, Element, Text, Comment } from 'hast';
 import type { MarkdownComponents } from './types';
 import { preloadKatexCss } from './MathProvider';
+import { CodeBlock } from './components/CodeBlock';
 
 type HastNode = Root | Element | Text | Comment;
 
@@ -44,8 +45,13 @@ export const Markdown = defineComponent({
       type: Array as PropType<PluginConfig[]>,
       default: () => [],
     },
+    copyButton: {
+      type: Boolean,
+      default: true,
+    },
   },
-  setup(props) {
+  emits: ['codeCopy'],
+  setup(props, { emit }) {
     // 启用数学公式时懒加载 KaTeX CSS
     watch(
       () => props.math,
@@ -119,7 +125,29 @@ export const Markdown = defineComponent({
         rehypePlugins: props.rehypePlugins,
       });
 
-      return hastToVNode(hast, props.components);
+      // 合并内置 CodeBlock 组件（如果启用 copyButton）
+      const mergedComponents: MarkdownComponents = {
+        ...(props.copyButton
+          ? {
+              pre: defineComponent({
+                setup(_, { slots }) {
+                  return () =>
+                    h(
+                      CodeBlock,
+                      {
+                        showCopyButton: props.copyButton,
+                        onCopy: (code: string) => emit('codeCopy', code),
+                      },
+                      slots.default
+                    );
+                },
+              }),
+            }
+          : {}),
+        ...props.components,
+      };
+
+      return hastToVNode(hast, mergedComponents);
     });
 
     return () => (vnode.value ? vnode.value : null);

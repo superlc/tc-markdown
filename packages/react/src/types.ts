@@ -19,6 +19,10 @@ export interface MarkdownProps extends ProcessorOptions {
   components?: MarkdownComponents;
   /** 容器 className */
   className?: string;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
+  /** 复制成功回调 */
+  onCodeCopy?: (code: string) => void;
 }
 
 /**
@@ -27,4 +31,8 @@ export interface MarkdownProps extends ProcessorOptions {
 export interface UseMarkdownOptions extends ProcessorOptions {
   /** 自定义组件映射 */
   components?: MarkdownComponents;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
+  /** 复制成功回调 */
+  onCodeCopy?: (code: string) => void;
 }

@@ -121,4 +121,8 @@ export interface StreamingMarkdownProps extends StreamingParserOptions {
   autoStart?: boolean;
   /** 流式渲染配置（动画等） */
   streaming?: StreamingConfig;
+  /** 是否显示代码块复制按钮，默认 true */
+  copyButton?: boolean;
+  /** 复制成功回调 */
+  onCodeCopy?: (code: string) => void;
 }

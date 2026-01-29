@@ -17,13 +17,17 @@ import {
 } from '@superlc/md-core';
 import type { MarkdownComponents } from '../types';
 import { preloadKatexCss } from '../MathProvider';
+import { CodeBlock } from '../components/CodeBlock';
 
 /**
  * 将 HAST 节点转换为 Vue VNode
  */
 function hastToVNode(
   node: Root | Element | { type: string; value?: string },
-  components?: MarkdownComponents
+  components?: MarkdownComponents,
+  copyButton?: boolean,
+  onCodeCopy?: (code: string) => void,
+  blockStable?: boolean
 ): VNode | string | null {
   if (node.type === 'text') {
     return (node as { value: string }).value;
@@ -31,7 +35,7 @@ function hastToVNode(
 
   if (node.type === 'root') {
     const children = (node as Root).children
-      .map((child) => hastToVNode(child as Element, components))
+      .map((child) => hastToVNode(child as Element, components, copyButton, onCodeCopy, blockStable))
       .filter((v): v is VNode | string => v !== null);
     return h('div', {}, children);
   }
@@ -50,8 +54,20 @@ function hastToVNode(
     }
 
     const children = element.children
-      .map((child) => hastToVNode(child as Element, components))
+      .map((child) => hastToVNode(child as Element, components, copyButton, onCodeCopy, blockStable))
       .filter((v): v is VNode | string => v !== null);
+
+    // 处理代码块复制按钮（仅稳定块显示）
+    if (tagName === 'pre' && copyButton && !CustomComponent) {
+      return h(
+        CodeBlock,
+        {
+          showCopyButton: blockStable && copyButton,
+          onCopy: onCodeCopy,
+        },
+        () => children
+      );
+    }
 
     if (CustomComponent) {
       return h(CustomComponent, props, () => children);
@@ -114,9 +130,13 @@ export const StreamingMarkdown = defineComponent({
       type: Boolean,
       default: false,
     },
+    copyButton: {
+      type: Boolean,
+      default: true,
+    },
   },
 
-  emits: ['complete', 'blockStable', 'progress'],
+  emits: ['complete', 'blockStable', 'progress', 'codeCopy'],
 
   setup(props, { emit }) {
     // 启用数学公式时懒加载 KaTeX CSS
@@ -281,6 +301,8 @@ export const StreamingMarkdown = defineComponent({
         ? streamComplete.value 
         : props.isComplete;
 
+      const handleCodeCopy = (code: string) => emit('codeCopy', code);
+
       const children = state.blocks
         .map((block) => {
           if (!block.hast) return null;
@@ -291,7 +313,7 @@ export const StreamingMarkdown = defineComponent({
               'data-block-key': block.key,
               'data-pending': !block.stable || undefined,
             },
-            [hastToVNode(block.hast, props.components)]
+            [hastToVNode(block.hast, props.components, props.copyButton, handleCodeCopy, block.stable)]
           );
         })
         .filter((v): v is VNode => v !== null);
