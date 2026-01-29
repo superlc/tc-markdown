@@ -32,7 +32,7 @@ This skill builds Storybook documentation and deploys it to a Lighthouse server 
 
 ```bash
 pnpm build:storybook:react
-# Output: storybook-static/react/
+# Output: docs/react/
 ```
 
 ### Step 2: Get Current Version
@@ -63,7 +63,7 @@ Use Lighthouse integration tools:
 ```
 call_integration: lighthouse / deploy_project_preparation
 Arguments: {
-  "FolderPath": "/path/to/storybook-static/react",
+  "FolderPath": "/path/to/docs/react",
   "InstanceId": "lhins-xxxxxx",
   "Region": "ap-tokyo",
   "ProjectName": "md-docs-X.Y.Z"
@@ -75,8 +75,9 @@ Arguments: {
 Execute commands on server:
 
 ```bash
-# Create versioned directory
+# Create versioned directory (clear if exists)
 mkdir -p /var/www/html/md/X.Y.Z
+rm -rf /var/www/html/md/X.Y.Z/*
 
 # Copy files to versioned directory
 cp -r /root/uploaded_project/* /var/www/html/md/X.Y.Z/
@@ -123,3 +124,4 @@ After deployment, docs are accessible at:
 - Clean up temporary upload directories after deployment
 - Ensure www-data ownership for nginx to serve files
 - Default nginx root is typically `/var/www/html`
+- **If version directory already exists, clear its contents before copying new files**
