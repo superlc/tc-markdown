@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2026-02-03
+
+### Features
+- **Mermaid 流式渲染**：为 MermaidBlock 组件添加流式渲染支持 (8f302c2)
+  - 新增 `streamStatus` prop，支持流式输入时的渐进式渲染
+  - 流式状态下延迟渲染，避免频繁重渲染
+  - 流式状态下渲染失败保持 loading 状态而非显示错误
+  - 渲染成功时自动切换到预览模式
+- 新增 Mermaid 流式渲染相关 Storybook 示例 (d716452)
+
+### Other Changes
+- 添加 Mermaid 功能说明到 README 文档 (b7f8d66)
+- 配置 Storybook 侧边栏排序
+
 ## [0.2.0] - 2026-02-03
 
 ### Features
