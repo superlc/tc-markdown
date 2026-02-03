@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-02-03
+
+### Features
+- **Mermaid 图表渲染**：支持在 Markdown 中渲染 Mermaid 图表 (088b7d1)
+  - 动态加载 Mermaid 库，优化首屏性能
+  - 支持浅色/暗色主题自动切换
+  - 全屏查看模式（使用浏览器原生 Fullscreen API）
+  - 缩放、平移、适应窗口等交互功能
+  - PNG 图片下载功能
+  - 渲染错误友好提示
+
+### Other Changes
+- 完善腾讯云 Lighthouse 部署文档 skill (fc3c130, 1e0353e)
+
 ## [0.1.1] - 2026-01-29
 
 ### Features
