@@ -1,0 +1,485 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="简介" />
+
+<style>
+  {`
+    .intro-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 40px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #1d2129;
+      line-height: 1.7;
+    }
+
+    .dark .intro-container {
+      color: #e8e8e8;
+    }
+    
+    .intro-title {
+      font-size: 30px;
+      font-weight: 500;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .intro-title .edit-icon {
+      font-size: 18px;
+      color: #86909c;
+      cursor: pointer;
+    }
+    
+    .intro-desc {
+      font-size: 14px;
+      color: #4e5969;
+      margin-bottom: 40px;
+      padding: 12px 16px;
+      background: #f7f8fa;
+      border-left: 3px solid #165dff;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .dark .intro-desc {
+      background: #2a2a2a;
+      color: #a9aeb8;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 32px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .feature-list li {
+      padding: 6px 0;
+      font-size: 14px;
+      color: #4e5969;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .dark .feature-list li {
+      color: #a9aeb8;
+    }
+
+    .feature-list li .icon {
+      flex-shrink: 0;
+    }
+
+    .compatibility-section {
+      margin: 32px 0;
+    }
+
+    .compatibility-desc {
+      font-size: 14px;
+      color: #4e5969;
+      margin-bottom: 16px;
+    }
+
+    .dark .compatibility-desc {
+      color: #a9aeb8;
+    }
+
+    .browser-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      border: 1px solid #e5e6eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .dark .browser-table {
+      border-color: #3a3a3a;
+    }
+
+    .browser-table th,
+    .browser-table td {
+      padding: 12px 16px;
+      text-align: center;
+      border-bottom: 1px solid #e5e6eb;
+    }
+
+    .dark .browser-table th,
+    .dark .browser-table td {
+      border-bottom-color: #3a3a3a;
+    }
+
+    .browser-table th {
+      background: #f7f8fa;
+      font-weight: normal;
+      color: #86909c;
+      font-size: 13px;
+    }
+
+    .dark .browser-table th {
+      background: #2a2a2a;
+    }
+
+    .browser-table td {
+      font-size: 14px;
+      color: #4e5969;
+    }
+
+    .dark .browser-table td {
+      color: #a9aeb8;
+    }
+
+    .browser-icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .spec-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+
+    .spec-list li {
+      padding: 4px 0;
+      font-size: 14px;
+    }
+
+    .spec-list li::before {
+      content: '◇';
+      color: #165dff;
+      margin-right: 8px;
+    }
+
+    .spec-list a {
+      color: #165dff;
+      text-decoration: none;
+    }
+
+    .spec-list a:hover {
+      text-decoration: underline;
+    }
+
+    .install-section {
+      margin: 32px 0;
+    }
+
+    .code-block {
+      background: #f7f8fa;
+      border-radius: 6px;
+      padding: 16px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .dark .code-block {
+      background: #1e1e1e;
+    }
+
+    .code-block code {
+      color: #1d2129;
+    }
+
+    .dark .code-block code {
+      color: #e8e8e8;
+    }
+
+    .code-comment {
+      color: #86909c;
+    }
+
+    .example-section {
+      margin: 32px 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e5e6eb;
+    }
+
+    .dark .tab-buttons {
+      border-bottom-color: #3a3a3a;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #4e5969;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active {
+      color: #165dff;
+      border-bottom-color: #165dff;
+    }
+
+    .framework-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 16px;
+    }
+
+    .framework-card {
+      border: 1px solid #e5e6eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .dark .framework-card {
+      border-color: #3a3a3a;
+    }
+
+    .framework-card-header {
+      padding: 12px 16px;
+      background: #f7f8fa;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 1px solid #e5e6eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dark .framework-card-header {
+      background: #2a2a2a;
+      border-bottom-color: #3a3a3a;
+    }
+
+    .framework-card-body {
+      padding: 0;
+    }
+
+    .framework-card-body .code-block {
+      margin: 0;
+      border-radius: 0;
+    }
+
+    .plugin-section {
+      margin: 32px 0;
+    }
+
+    .plugin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .plugin-card {
+      padding: 16px;
+      border: 1px solid #e5e6eb;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .dark .plugin-card {
+      border-color: #3a3a3a;
+    }
+
+    .plugin-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .plugin-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .plugin-desc {
+      font-size: 12px;
+      color: #86909c;
+    }
+
+    .link-highlight {
+      color: #165dff;
+      background: #e8f3ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .dark .link-highlight {
+      background: #1a3a5c;
+    }
+
+    @media (max-width: 768px) {
+      .framework-grid {
+        grid-template-columns: 1fr;
+      }
+      .plugin-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  `}
+</style>
+
+<div className="intro-container">
+
+# Introduction
+
+<div className="intro-desc">
+  <code>@superlc/md-react</code> / <code>@superlc/md-vue</code> 旨在提供流式友好、高度可扩展的高性能 Markdown 渲染器。支持流式渲染、数学公式、代码高亮、Mermaid 图表等能力。
+</div>
+
+<h2 className="section-title">✨ Features</h2>
+
+基于 <a href="https://unifiedjs.com/" className="link-highlight">unified</a> 生态构建，继承 unified 的所有特性。
+
+<ul className="feature-list">
+  <li><span className="icon">🚀</span> <strong>为速度而生</strong> - 高性能的 Markdown 解析和渲染</li>
+  <li><span className="icon">🌊</span> <strong>流式友好</strong> - 专为大模型输出场景设计的流式渲染方案</li>
+  <li><span className="icon">📦</span> <strong>核心分离</strong> - 解析核心与渲染层分离，支持 React 和 Vue 双框架</li>
+  <li><span className="icon">🪶</span> <strong>轻量实现</strong> - 在实现所有支持的 Markdown 样式和规范的同时保持轻量</li>
+  <li><span className="icon">🔒</span> <strong>默认安全</strong> - 无 dangerouslySetInnerHTML XSS 攻击风险</li>
+  <li><span className="icon">🎨</span> <strong>可定制组件</strong> - 可替换任意 Markdown 元素为自定义组件，如 `h2` 替换为 `## h1`</li>
+  <li><span className="icon">🔌</span> <strong>插件生态</strong> - 丰富的 remark/rehype 插件生态可供选择</li>
+  <li><span className="icon">✅</span> <strong>规范兼容</strong> - 100% CommonMark 兼容，100% GFM 插件兼容</li>
+</ul>
+
+<h2 className="section-title">Compatibility</h2>
+
+<p className="compatibility-desc">
+  与 <a href="https://unifiedjs.com/" className="link-highlight">unified</a> 生态对齐。为提高整体 Markdown 兼容性，可添加自定义 polyfills。
+</p>
+
+<table className="browser-table">
+  <thead>
+    <tr>
+      <th><span className="browser-icon">🌐</span>Edge</th>
+      <th><span className="browser-icon">🦊</span>Firefox</th>
+      <th><span className="browser-icon">🔵</span>Chrome</th>
+      <th><span className="browser-icon">🧭</span>Safari</th>
+      <th><span className="browser-icon">🔴</span>Opera</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>>= 92</td>
+      <td>>= 98</td>
+      <td>>= 92</td>
+      <td>>= 15.4</td>
+      <td>>= 78</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 className="section-title">Supported Markdown Specifications</h2>
+
+<ul className="spec-list">
+  <li><a href="https://daringfireball.net/projects/markdown/">Markdown 1.0.0</a></li>
+  <li><a href="https://commonmark.org/">CommonMark</a></li>
+  <li><a href="https://github.github.com/gfm/">GitHub Flavored Markdown (GFM)</a></li>
+</ul>
+
+<h2 className="section-title">Installation</h2>
+
+<div className="code-block">
+  <code>
+    <span className="code-comment"># React</span><br />
+    npm install @superlc/md-react<br /><br />
+    <span className="code-comment"># Vue</span><br />
+    npm install @superlc/md-vue<br /><br />
+    <span className="code-comment"># 使用 pnpm</span><br />
+    pnpm add @superlc/md-react<br />
+    pnpm add @superlc/md-vue
+  </code>
+</div>
+
+<h2 className="section-title">Example</h2>
+
+<div className="framework-grid">
+  <div className="framework-card">
+    <div className="framework-card-header">
+      <span>⚛️</span> React
+    </div>
+    <div className="framework-card-body">
+      <div className="code-block">
+        <code>
+{`import { Markdown } from '@superlc/md-react';
+
+function App() {
+  return (
+    <Markdown>
+      # Hello World
+      This is **markdown** content.
+    </Markdown>
+  );
+}`}
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <div className="framework-card">
+    <div className="framework-card-header">
+      <span>💚</span> Vue
+    </div>
+    <div className="framework-card-body">
+      <div className="code-block">
+        <code>
+{`<template>
+  <Markdown :content="content" />
+</template>
+
+<script setup>
+import { Markdown } from '@superlc/md-vue';
+
+const content = \`# Hello World
+This is **markdown** content.\`;
+</script>`}
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 className="section-title">Plugins</h2>
+
+<div className="plugin-grid">
+  <div className="plugin-card">
+    <div className="plugin-icon">📐</div>
+    <div className="plugin-name">数学公式</div>
+    <div className="plugin-desc">KaTeX / MathJax</div>
+  </div>
+  <div className="plugin-card">
+    <div className="plugin-icon">📊</div>
+    <div className="plugin-name">Mermaid</div>
+    <div className="plugin-desc">流程图、时序图</div>
+  </div>
+  <div className="plugin-card">
+    <div className="plugin-icon">🎨</div>
+    <div className="plugin-name">代码高亮</div>
+    <div className="plugin-desc">highlight.js</div>
+  </div>
+</div>
+
+<h2 className="section-title">Themes</h2>
+
+<p className="compatibility-desc">
+  组件支持亮色/暗色主题切换，自动适配 Storybook 主题设置。
+</p>
+
+</div>

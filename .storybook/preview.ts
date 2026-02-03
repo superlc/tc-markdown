@@ -64,6 +64,7 @@ const preview: Preview = {
     options: {
       storySort: {
         order: [
+          '简介',
           'React',
           ['基础示例', '数学公式', 'Mermaid 图表'],
           'Vue',
