@@ -28,7 +28,13 @@
     "katex": "^0.16.28"
   },
   "peerDependencies": {
-    "vue": ">=3.3.0"
+    "vue": ">=3.3.0",
+    "mermaid": ">=10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/hast": "^3.0.0",

@@ -39,13 +39,17 @@
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "vue": ">=3.0.0"
+    "vue": ">=3.0.0",
+    "mermaid": ">=10.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     },
     "vue": {
+      "optional": true
+    },
+    "mermaid": {
       "optional": true
     }
   },

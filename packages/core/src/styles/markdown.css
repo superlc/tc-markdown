@@ -598,3 +598,295 @@
 .katex-error {
     color: inherit !important;
 }
+
+/* ========================================
+   Mermaid 图表块样式
+   ======================================== */
+
+/* CSS 变量 - 浅色模式 */
+:root,
+.md-light {
+    --md-mermaid-bg: var(--md-color-bg-code-block);
+    --md-mermaid-border: var(--md-color-border);
+    --md-mermaid-toolbar-bg: rgba(0, 0, 0, 0.03);
+    --md-mermaid-toolbar-btn-bg: transparent;
+    --md-mermaid-toolbar-btn-bg-hover: rgba(0, 0, 0, 0.08);
+    --md-mermaid-toolbar-btn-bg-active: rgba(0, 0, 0, 0.12);
+    --md-mermaid-toolbar-btn-color: var(--md-color-text-muted);
+    --md-mermaid-toolbar-btn-color-hover: var(--md-color-text);
+    --md-mermaid-error-bg: rgba(239, 68, 68, 0.1);
+    --md-mermaid-error-color: #dc2626;
+}
+
+/* CSS 变量 - 暗黑模式 */
+@media (prefers-color-scheme: dark) {
+    :root:not(.md-light) {
+        --md-mermaid-bg: var(--md-color-bg-code-block);
+        --md-mermaid-border: var(--md-color-border);
+        --md-mermaid-toolbar-bg: rgba(255, 255, 255, 0.05);
+        --md-mermaid-toolbar-btn-bg: transparent;
+        --md-mermaid-toolbar-btn-bg-hover: rgba(255, 255, 255, 0.1);
+        --md-mermaid-toolbar-btn-bg-active: rgba(255, 255, 255, 0.15);
+        --md-mermaid-toolbar-btn-color: var(--md-color-text-muted);
+        --md-mermaid-toolbar-btn-color-hover: var(--md-color-text);
+        --md-mermaid-error-bg: rgba(239, 68, 68, 0.15);
+        --md-mermaid-error-color: #f87171;
+    }
+}
+
+.md-dark {
+    --md-mermaid-bg: var(--md-color-bg-code-block);
+    --md-mermaid-border: var(--md-color-border);
+    --md-mermaid-toolbar-bg: rgba(255, 255, 255, 0.05);
+    --md-mermaid-toolbar-btn-bg: transparent;
+    --md-mermaid-toolbar-btn-bg-hover: rgba(255, 255, 255, 0.1);
+    --md-mermaid-toolbar-btn-bg-active: rgba(255, 255, 255, 0.15);
+    --md-mermaid-toolbar-btn-color: var(--md-color-text-muted);
+    --md-mermaid-toolbar-btn-color-hover: var(--md-color-text);
+    --md-mermaid-error-bg: rgba(239, 68, 68, 0.15);
+    --md-mermaid-error-color: #f87171;
+}
+
+/* Mermaid 块容器 */
+.md-mermaid-block {
+    position: relative;
+    border-radius: var(--md-radius);
+    overflow: hidden;
+    border: 1px solid var(--md-mermaid-border);
+    background-color: var(--md-mermaid-bg);
+}
+
+/* Mermaid 工具栏 */
+.md-mermaid-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    gap: 8px;
+    background-color: var(--md-mermaid-toolbar-bg);
+    border-bottom: 1px solid var(--md-mermaid-border);
+}
+
+.md-mermaid-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.md-mermaid-toolbar-divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--md-mermaid-border);
+    margin: 0 4px;
+}
+
+.md-mermaid-mode-switch {
+    background-color: var(--md-mermaid-toolbar-btn-bg-hover);
+    border-radius: var(--md-radius-sm);
+    padding: 2px;
+}
+
+/* 工具栏按钮 */
+.md-mermaid-toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--md-radius-sm);
+    background-color: var(--md-mermaid-toolbar-btn-bg);
+    color: var(--md-mermaid-toolbar-btn-color);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.md-mermaid-toolbar-btn:hover:not(:disabled) {
+    background-color: var(--md-mermaid-toolbar-btn-bg-hover);
+    color: var(--md-mermaid-toolbar-btn-color-hover);
+}
+
+.md-mermaid-toolbar-btn:active:not(:disabled) {
+    background-color: var(--md-mermaid-toolbar-btn-bg-active);
+}
+
+.md-mermaid-toolbar-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.md-mermaid-toolbar-btn--active {
+    background-color: var(--md-mermaid-toolbar-btn-bg-active);
+    color: var(--md-mermaid-toolbar-btn-color-hover);
+}
+
+.md-mermaid-toolbar-btn--success {
+    color: var(--md-copy-button-success);
+}
+
+.md-mermaid-toolbar-btn--close:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.md-mermaid-toolbar-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 缩放百分比标签 */
+.md-mermaid-zoom-label {
+    min-width: 42px;
+    text-align: center;
+    font-size: 12px;
+    font-family: var(--md-font-family-mono);
+    color: var(--md-mermaid-toolbar-btn-color);
+    user-select: none;
+}
+
+/* Mermaid 内容区域 */
+.md-mermaid-content {
+    position: relative;
+    min-height: 100px;
+}
+
+/* 预览模式 */
+.md-mermaid-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    min-height: 120px;
+    overflow: hidden;
+}
+
+.md-mermaid-svg-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+}
+
+.md-mermaid-svg-container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 代码模式 */
+.md-mermaid-code {
+    position: relative;
+}
+
+.md-mermaid-code pre {
+    margin: 0;
+    border-radius: 0;
+    background-color: var(--md-mermaid-bg);
+}
+
+.md-mermaid-code pre code {
+    color: var(--md-color-text);
+}
+
+/* 错误提示 */
+.md-mermaid-error {
+    padding: 8px 12px;
+    font-size: 13px;
+    background-color: var(--md-mermaid-error-bg);
+    color: var(--md-mermaid-error-color);
+    border-top: 1px solid currentColor;
+}
+
+/* Loading 骨架屏 */
+.md-mermaid-skeleton {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.md-mermaid-skeleton-box {
+    width: 100%;
+    height: 150px;
+    background-color: var(--md-skeleton-bg);
+    background-image: linear-gradient(90deg, var(--md-skeleton-bg) 0%, var(--md-skeleton-shine) 50%, var(--md-skeleton-bg) 100%);
+    background-size: 200% 100%;
+    animation: md-image-shimmer 1.5s linear infinite;
+    border-radius: var(--md-radius);
+}
+
+/* ========================================
+   Mermaid 全屏查看器（使用浏览器原生全屏）
+   ======================================== */
+
+/* 全屏容器 - 默认隐藏 */
+.md-mermaid-fullscreen-wrapper {
+    display: none;
+}
+
+/* 全屏激活状态 - 作为全屏元素的根容器 */
+.md-mermaid-fullscreen-wrapper--active {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: var(--md-color-bg, #ffffff);
+}
+
+/* 暗黑模式背景 */
+@media (prefers-color-scheme: dark) {
+    :root:not(.md-light) .md-mermaid-fullscreen-wrapper--active {
+        background-color: var(--md-color-bg, #1a1a2e);
+    }
+}
+
+.md-dark .md-mermaid-fullscreen-wrapper--active,
+:root.dark .md-mermaid-fullscreen-wrapper--active,
+[data-theme="dark"] .md-mermaid-fullscreen-wrapper--active {
+    background-color: var(--md-color-bg, #1a1a2e);
+}
+
+/* 全屏工具栏 */
+.md-mermaid-fullscreen-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: var(--md-mermaid-toolbar-bg);
+    border-bottom: 1px solid var(--md-mermaid-border);
+}
+
+.md-mermaid-fullscreen-toolbar .md-mermaid-toolbar-btn {
+    color: var(--md-mermaid-toolbar-btn-color);
+}
+
+.md-mermaid-fullscreen-toolbar .md-mermaid-toolbar-btn:hover:not(:disabled) {
+    background-color: var(--md-mermaid-toolbar-btn-bg-hover);
+    color: var(--md-mermaid-toolbar-btn-color-hover);
+}
+
+.md-mermaid-fullscreen-toolbar .md-mermaid-zoom-label {
+    color: var(--md-mermaid-toolbar-btn-color);
+}
+
+/* 全屏内容区域 */
+.md-mermaid-fullscreen-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 24px;
+}
+
+.md-mermaid-fullscreen-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+}
+
+.md-mermaid-fullscreen-svg svg {
+    max-width: none;
+    max-height: none;
+}

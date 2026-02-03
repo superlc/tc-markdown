@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { ProcessorOptions } from '@superlc/md-core';
+import type { ProcessorOptions, MermaidTheme } from '@superlc/md-core';
 
 // 从 core 重新导出
 export type { PluginConfig } from '@superlc/md-core';
@@ -45,6 +45,16 @@ export interface MarkdownComponents {
 }
 
 /**
+ * Mermaid 配置选项
+ */
+export interface MermaidOptions {
+  /** 是否启用 Mermaid 渲染，默认 false */
+  enabled?: boolean;
+  /** 主题 */
+  theme?: MermaidTheme | 'auto';
+}
+
+/**
  * Markdown 组件 Props
  */
 export interface MarkdownProps extends ProcessorOptions {
@@ -56,6 +66,13 @@ export interface MarkdownProps extends ProcessorOptions {
   class?: string;
   /** 是否显示代码块复制按钮，默认 true */
   copyButton?: boolean;
+  /**
+   * Mermaid 渲染配置
+   * - true: 启用默认配置
+   * - false: 禁用（默认）
+   * - MermaidOptions: 自定义配置
+   */
+  mermaid?: boolean | MermaidOptions;
 }
 
 /**
@@ -66,4 +83,6 @@ export interface UseMarkdownOptions extends ProcessorOptions {
   components?: MarkdownComponents;
   /** 是否显示代码块复制按钮，默认 true */
   copyButton?: boolean;
+  /** Mermaid 渲染配置 */
+  mermaid?: boolean | MermaidOptions;
 }

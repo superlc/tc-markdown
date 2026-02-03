@@ -41,3 +41,27 @@ export type {
 
 // 内置插件
 export { rehypeImageSize } from './plugins';
+
+// Mermaid 渲染工具
+export {
+  MermaidRenderer,
+  loadMermaid,
+  downloadAsPng,
+  downloadAsSvg,
+  svgToPngBlob,
+  defaultCustomTheme,
+  lightThemeVariables,
+  darkThemeVariables,
+  detectColorScheme,
+  observeColorScheme,
+} from './mermaid';
+export type {
+  MermaidRenderOptions,
+  MermaidRenderResult,
+  MermaidTheme,
+  MermaidThemeVariables,
+  MermaidCustomTheme,
+  DownloadOptions,
+  ColorScheme,
+  DarkModeDetectorOptions,
+} from './mermaid';

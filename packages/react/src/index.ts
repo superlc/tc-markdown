@@ -5,9 +5,16 @@
 
 export { Markdown } from './Markdown';
 export { useMarkdown } from './useMarkdown';
-export { CodeBlock } from './components';
-export type { CodeBlockProps } from './components';
-export type { MarkdownProps, MarkdownComponents, UseMarkdownOptions } from './types';
+export { CodeBlock, MermaidBlock, MermaidFullscreenViewer, useZoom } from './components';
+export type {
+  CodeBlockProps,
+  MermaidBlockProps,
+  MermaidFullscreenViewerProps,
+  ViewMode,
+  ZoomConfig,
+  ZoomState,
+} from './components';
+export type { MarkdownProps, MarkdownComponents, UseMarkdownOptions, MermaidOptions } from './types';
 
 // 流式渲染
 export {
