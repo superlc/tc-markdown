@@ -61,6 +61,17 @@ const preview: Preview = {
       darkClass: 'dark',
       lightClass: 'light',
     },
+    options: {
+      storySort: {
+        order: [
+          'React',
+          ['基础示例', '数学公式', 'Mermaid 图表'],
+          'Vue',
+          ['基础示例', '数学公式', 'Mermaid 图表'],
+          '*',
+        ],
+      },
+    },
   },
   tags: ['autodocs'],
   decorators: [

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { VueRenderer } from '../components/VueRenderer';
-import { Markdown, MermaidBlock, StreamingMarkdown } from '@superlc/md-vue';
+import { Markdown, MermaidBlock } from '@superlc/md-vue';
+import type { StreamStatus } from '@superlc/md-vue';
 import '../styles.css';
 
 const meta: Meta<typeof VueRenderer> = {
@@ -198,88 +199,6 @@ sequenceDiagram
 };
 
 /**
- * 流式渲染 Mermaid
- */
-export const 流式渲染Mermaid: Story = {
-  render: () => {
-    const [key, setKey] = useState(0);
-
-    const markdownContent = `# 流式渲染 Mermaid 图表
-
-## 项目架构
-
-\`\`\`mermaid
-graph TD
-    A[用户请求] --> B[负载均衡]
-    B --> C[Web 服务]
-    C --> D[缓存层]
-    D --> E[数据库]
-\`\`\`
-
-## 开发流程
-
-\`\`\`mermaid
-sequenceDiagram
-    Developer->>Git: 提交代码
-    Git->>CI: 触发构建
-    CI->>Test: 运行测试
-    Test-->>CI: 测试结果
-    CI->>Deploy: 部署应用
-\`\`\`
-`;
-
-    const StreamingWrapper: React.FC = () => {
-      const containerRef = React.useRef<HTMLDivElement>(null);
-      const appRef = React.useRef<ReturnType<typeof import('vue').createApp> | null>(null);
-
-      React.useEffect(() => {
-        if (!containerRef.current) return;
-
-        import('vue').then(({ createApp }) => {
-          if (appRef.current) {
-            appRef.current.unmount();
-          }
-
-          containerRef.current!.innerHTML = '';
-          const mountEl = document.createElement('div');
-          containerRef.current!.appendChild(mountEl);
-
-          const app = createApp(StreamingMarkdown, {
-            source: markdownContent,
-            outputRate: 'medium',
-            class: 'markdown-body',
-            mermaid: true,
-          });
-          app.mount(mountEl);
-          appRef.current = app;
-        });
-
-        return () => {
-          if (appRef.current) {
-            appRef.current.unmount();
-            appRef.current = null;
-          }
-        };
-      }, []);
-
-      return <div ref={containerRef} />;
-    };
-
-    return (
-      <div className="streaming-demo">
-        <div className="controls">
-          <button onClick={() => setKey((k) => k + 1)}>重新开始</button>
-          <span className="status">流式渲染 Mermaid</span>
-        </div>
-        <div className="content-area">
-          <StreamingWrapper key={key} />
-        </div>
-      </div>
-    );
-  },
-};
-
-/**
  * 错误处理示例
  */
 export const 语法错误处理: Story = {
@@ -290,5 +209,237 @@ export const 语法错误处理: Story = {
     A --> B
     C ---> D  // 无效语法`,
     },
+  },
+};
+
+// ==================== 流式渲染相关 ====================
+
+// 模拟流式输入的 Hook
+function useStreamingText(fullText: string, charPerTick = 3, interval = 50) {
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState<StreamStatus>('loading');
+  const indexRef = useRef(0);
+
+  const reset = () => {
+    indexRef.current = 0;
+    setText('');
+    setStatus('loading');
+  };
+
+  useEffect(() => {
+    if (status === 'done') return;
+
+    const timer = setInterval(() => {
+      const nextIndex = Math.min(indexRef.current + charPerTick, fullText.length);
+      setText(fullText.slice(0, nextIndex));
+      indexRef.current = nextIndex;
+
+      if (nextIndex >= fullText.length) {
+        setStatus('done');
+        clearInterval(timer);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [fullText, charPerTick, interval, status]);
+
+  return { text, status, reset };
+}
+
+// 复杂流程图示例
+const complexFlowchart = `graph TB
+    subgraph 前端
+        A[用户界面] --> B[状态管理]
+        B --> C[API 调用]
+    end
+    
+    subgraph 后端
+        D[API 网关] --> E[认证服务]
+        D --> F[业务服务]
+        F --> G[(数据库)]
+    end
+    
+    C --> D`;
+
+// Vue MermaidBlock 流式渲染包装器
+const VueMermaidStreamingWrapper: React.FC<{
+  code: string;
+  streamStatus: StreamStatus;
+}> = ({ code, streamStatus }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<ReturnType<typeof import('vue').createApp> | null>(null);
+  const stateRef = useRef<{ code: string; streamStatus: StreamStatus } | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    import('vue').then(({ createApp, reactive, h, defineComponent }) => {
+      if (appRef.current) {
+        appRef.current.unmount();
+      }
+
+      containerRef.current!.innerHTML = '';
+      const mountEl = document.createElement('div');
+      containerRef.current!.appendChild(mountEl);
+
+      const state = reactive({
+        code: code,
+        streamStatus: streamStatus,
+      });
+      stateRef.current = state;
+
+      // 创建一个包装组件，使用响应式 state 渲染 MermaidBlock
+      const WrapperComponent = defineComponent({
+        name: 'MermaidBlockWrapper',
+        setup() {
+          return () => h(MermaidBlock, {
+            code: state.code,
+            streamStatus: state.streamStatus,
+          });
+        },
+      });
+
+      const app = createApp(WrapperComponent);
+      app.mount(mountEl);
+      appRef.current = app;
+    });
+
+    return () => {
+      if (appRef.current) {
+        appRef.current.unmount();
+        appRef.current = null;
+      }
+      stateRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (stateRef.current) {
+      stateRef.current.code = code;
+      stateRef.current.streamStatus = streamStatus;
+    }
+  }, [code, streamStatus]);
+
+  return <div ref={containerRef} />;
+};
+
+/**
+ * 流式渲染演示
+ */
+export const 流式渲染: Story = {
+  render: () => {
+    const { text, status, reset } = useStreamingText(flowchartCode, 2, 80);
+
+    return (
+      <div className="demo-container">
+        <h2>Mermaid 流式渲染</h2>
+        <p>
+          当 <code>streamStatus="loading"</code> 时，组件会：
+        </p>
+        <ul>
+          <li>延迟 150ms 后再渲染（避免频繁重渲染）</li>
+          <li>渲染失败时保留上次有效结果（而非显示错误）</li>
+          <li>流式完成后才显示真正的错误信息</li>
+        </ul>
+
+        <div className="streaming-demo">
+          <div className="controls">
+            <button onClick={reset}>重新开始</button>
+            <span className="status">
+              状态: <strong>{status === 'loading' ? '流式输入中...' : '完成'}</strong>
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '20px', marginTop: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <h4>输入中的代码：</h4>
+              <pre
+                style={{
+                  background: '#f5f5f5',
+                  padding: '12px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  minHeight: '150px',
+                }}
+              >
+                {text || '(等待输入...)'}
+              </pre>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4>渲染结果：</h4>
+              <VueMermaidStreamingWrapper code={text || 'graph TD\n    A[...]'} streamStatus={status} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * 流式优化对比
+ */
+export const 流式优化对比: Story = {
+  render: () => {
+    const { text, status, reset } = useStreamingText(sequenceCode, 3, 60);
+
+    return (
+      <div className="demo-container">
+        <h2>流式优化对比</h2>
+        <p>左侧开启流式优化，右侧关闭（始终 done 状态）。观察渲染差异。</p>
+
+        <div className="streaming-demo">
+          <div className="controls">
+            <button onClick={reset}>重新开始</button>
+            <span className="status">
+              状态: <strong>{status === 'loading' ? '流式输入中...' : '完成'}</strong>
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '20px', marginTop: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <h4>✅ 开启流式优化 (streamStatus="{status}")</h4>
+              <VueMermaidStreamingWrapper code={text || 'sequenceDiagram\n    A->>B: ...'} streamStatus={status} />
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4>❌ 关闭流式优化 (streamStatus="done")</h4>
+              <VueMermaidStreamingWrapper code={text || 'sequenceDiagram\n    A->>B: ...'} streamStatus="done" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * 复杂图表流式渲染
+ */
+export const 复杂图表流式渲染: Story = {
+  render: () => {
+    const { text, status, reset } = useStreamingText(complexFlowchart, 4, 50);
+
+    return (
+      <div className="demo-container">
+        <h2>复杂图表流式渲染</h2>
+        <p>包含子图的复杂流程图，展示流式渲染的稳定性。</p>
+
+        <div className="streaming-demo">
+          <div className="controls">
+            <button onClick={reset}>重新开始</button>
+            <span className="status">
+              进度: {Math.round((text.length / complexFlowchart.length) * 100)}% |
+              状态: <strong>{status === 'loading' ? '输入中' : '完成'}</strong>
+            </span>
+          </div>
+
+          <div className="content-area" style={{ marginTop: '16px' }}>
+            <VueMermaidStreamingWrapper code={text || 'graph TB\n    A[...]'} streamStatus={status} />
+          </div>
+        </div>
+      </div>
+    );
   },
 };

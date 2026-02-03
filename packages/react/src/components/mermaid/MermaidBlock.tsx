@@ -1,6 +1,7 @@
 /**
  * Mermaid 图表块组件
  * 支持图片/代码切换、缩放、全屏、下载
+ * 支持流式渲染优化（延迟渲染 + 保留上次有效结果）
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -26,6 +27,9 @@ import {
   CopyIcon,
   CheckIcon,
 } from './icons';
+
+// 流式渲染配置
+const STREAM_RENDER_DELAY = 150; // 流式状态下的渲染延迟（ms）
 
 // 全局渲染器实例（单例，因为 Mermaid 本身是全局单例）
 let rendererInstance: MermaidRenderer | null = null;
@@ -69,6 +73,7 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({
   showToolbar = true,
   onCopy,
   className,
+  streamStatus = 'done',
 }) => {
   const [mode, setMode] = useState<ViewMode>('preview');
   const [renderResult, setRenderResult] = useState<MermaidRenderResult | null>(null);
@@ -78,6 +83,11 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // 用于跟踪主题变化（支持系统偏好和 CSS 类名切换）
   const [colorScheme, setColorScheme] = useState<ColorScheme>(() => detectColorScheme());
+
+  // 流式渲染优化：保留上次有效的 SVG
+  const lastValidSvgRef = useRef<string | null>(null);
+  // 延迟渲染定时器
+  const renderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     state: zoomState,
@@ -98,32 +108,100 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({
     });
   }, [theme]);
 
-  // 渲染 Mermaid
+  // 用于存储最新的 code 和 streamStatus，供定时器回调使用
+  const latestCodeRef = useRef(code);
+  const latestStreamStatusRef = useRef(streamStatus);
+  latestCodeRef.current = code;
+  latestStreamStatusRef.current = streamStatus;
+
+  // 渲染 Mermaid（带流式优化）
   useEffect(() => {
-    let cancelled = false;
+    const doRender = async (renderCode: string) => {
+      console.log('[MermaidBlock] doRender start', { codeLength: renderCode.length });
 
-    const render = async () => {
-      setIsLoading(true);
       const renderer = getRenderer(theme);
-      const result = await renderer.render(code);
+      const result = await renderer.render(renderCode);
 
-      if (!cancelled) {
+      // 获取当前最新的 streamStatus
+      const currentStreamStatus = latestStreamStatusRef.current;
+
+      console.log('[MermaidBlock] render result', {
+        success: result.success,
+        hasSvg: !!result.svg,
+        error: result.error,
+        currentStreamStatus,
+      });
+
+      if (result.success && result.svg) {
+        // 渲染成功，更新结果并缓存有效 SVG
+        lastValidSvgRef.current = result.svg;
         setRenderResult(result);
         setIsLoading(false);
-
-        // 渲染失败时自动切换到代码模式
-        if (!result.success) {
+        // 渲染成功时切换到预览模式
+        setMode('preview');
+        console.log('[MermaidBlock] render success, cached SVG');
+      } else {
+        // 渲染失败
+        if (currentStreamStatus === 'loading') {
+          // 流式输入中：尝试使用缓存，否则保持 loading 状态
+          if (lastValidSvgRef.current) {
+            setRenderResult({
+              success: true,
+              svg: lastValidSvgRef.current,
+            });
+            setIsLoading(false);
+            console.log('[MermaidBlock] render failed, using cache');
+          } else {
+            // 无缓存，保持 loading 状态，不切换到代码模式
+            console.log('[MermaidBlock] render failed, no cache, keep loading');
+          }
+        } else {
+          // 非流式：显示错误并切换到代码模式
+          setRenderResult(result);
+          setIsLoading(false);
           setMode('code');
+          console.log('[MermaidBlock] render failed, showing error');
         }
       }
     };
 
-    render();
+    console.log('[MermaidBlock] useEffect triggered', {
+      streamStatus,
+      codeLength: code.length,
+      hasTimer: !!renderTimerRef.current,
+      hasCache: !!lastValidSvgRef.current,
+    });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [code, theme, colorScheme]);
+    if (streamStatus === 'loading') {
+      // 流式输入中：使用节流，只有当没有定时器时才设置新的
+      if (!renderTimerRef.current) {
+        // 流式状态下有缓存时，不显示 loading
+        if (!lastValidSvgRef.current) {
+          setIsLoading(true);
+        }
+        console.log('[MermaidBlock] setting timer');
+        renderTimerRef.current = setTimeout(() => {
+          console.log('[MermaidBlock] timer fired, rendering with latest code');
+          renderTimerRef.current = null;
+          // 使用最新的 code 进行渲染
+          doRender(latestCodeRef.current);
+        }, STREAM_RENDER_DELAY);
+      } else {
+        console.log('[MermaidBlock] timer already exists, skipping');
+      }
+    } else {
+      // 流式完成或非流式：清除定时器并立即渲染
+      console.log('[MermaidBlock] immediate render (not loading)');
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
+      }
+      setIsLoading(true);
+      doRender(code);
+    }
+
+    // 注意：不在 cleanup 中取消定时器，让它能够执行
+  }, [code, theme, colorScheme, streamStatus]);
 
   // 复制代码
   const handleCopy = useCallback(async () => {
@@ -288,8 +366,8 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({
             <pre>
               <code className="language-mermaid">{code}</code>
             </pre>
-            {/* 错误提示 */}
-            {renderResult && !renderResult.success && (
+            {/* 错误提示 - 仅在非流式或流式完成时显示 */}
+            {renderResult && !renderResult.success && streamStatus === 'done' && (
               <div className="md-mermaid-error">
                 <span>渲染失败: </span>
                 <span>{renderResult.error}</span>

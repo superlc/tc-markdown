@@ -11,4 +11,5 @@ export type {
   ViewMode,
   ZoomConfig,
   ZoomState,
+  StreamStatus,
 } from './types';

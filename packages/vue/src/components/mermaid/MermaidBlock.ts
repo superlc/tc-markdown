@@ -1,6 +1,7 @@
 /**
  * Mermaid 图表块组件 (Vue)
  * 支持图片/代码切换、缩放、全屏、下载
+ * 支持流式渲染优化（延迟渲染 + 保留上次有效结果）
  */
 
 import {
@@ -22,7 +23,7 @@ import {
   type MermaidTheme,
   type ColorScheme,
 } from '@superlc/md-core';
-import type { ViewMode } from './types';
+import type { ViewMode, StreamStatus } from './types';
 import { useZoom } from './useZoom';
 import { MermaidFullscreenViewer } from './MermaidFullscreenViewer';
 import {
@@ -36,6 +37,9 @@ import {
   CopyIcon,
   CheckIcon,
 } from './icons';
+
+// 流式渲染配置
+const STREAM_RENDER_DELAY = 150; // 流式状态下的渲染延迟（ms）
 
 // 全局渲染器实例（单例，因为 Mermaid 本身是全局单例）
 let rendererInstance: MermaidRenderer | null = null;
@@ -88,6 +92,10 @@ export const MermaidBlock = defineComponent({
       type: Boolean,
       default: true,
     },
+    streamStatus: {
+      type: String as PropType<StreamStatus>,
+      default: 'done',
+    },
   },
   emits: ['copy'],
   setup(props, { emit }) {
@@ -98,6 +106,11 @@ export const MermaidBlock = defineComponent({
     const copied = ref(false);
     // 用于跟踪主题变化（支持系统偏好和 CSS 类名切换）
     const colorScheme = ref<ColorScheme>(detectColorScheme());
+
+    // 流式渲染优化：保留上次有效的 SVG
+    let lastValidSvg: string | null = null;
+    // 延迟渲染定时器
+    let renderTimer: ReturnType<typeof setTimeout> | null = null;
 
     const {
       state: zoomState,
@@ -126,22 +139,76 @@ export const MermaidBlock = defineComponent({
 
     onUnmounted(() => {
       cleanupObserver?.();
+      if (renderTimer) {
+        clearTimeout(renderTimer);
+        renderTimer = null;
+      }
     });
 
-    // 渲染 Mermaid
+    // 渲染 Mermaid（带流式优化）
+    // 用于存储最新的 code 和 streamStatus，供定时器回调使用
+    let latestCode = props.code;
+    let latestStreamStatus = props.streamStatus;
+
     watch(
-      () => [props.code, props.theme, colorScheme.value],
+      () => [props.code, props.theme, colorScheme.value, props.streamStatus],
       async () => {
-        isLoading.value = true;
-        const renderer = getRenderer(props.theme);
-        const result = await renderer.render(props.code);
+        // 更新最新值
+        latestCode = props.code;
+        latestStreamStatus = props.streamStatus;
 
-        renderResult.value = result;
-        isLoading.value = false;
+        const doRender = async () => {
+          // 流式状态下有缓存时，不显示 loading（保持显示上次结果）
+          if (!(latestStreamStatus === 'loading' && lastValidSvg)) {
+            isLoading.value = true;
+          }
 
-        // 渲染失败时自动切换到代码模式
-        if (!result.success) {
-          mode.value = 'code';
+          const renderer = getRenderer(props.theme);
+          const result = await renderer.render(latestCode);
+
+          if (result.success && result.svg) {
+            // 渲染成功，更新结果并缓存有效 SVG
+            lastValidSvg = result.svg;
+            renderResult.value = result;
+            isLoading.value = false;
+            // 渲染成功时切换到预览模式
+            mode.value = 'preview';
+          } else {
+            // 渲染失败
+            if (latestStreamStatus === 'loading') {
+              // 流式输入中：尝试使用缓存，否则保持 loading 状态
+              if (lastValidSvg) {
+                renderResult.value = {
+                  success: true,
+                  svg: lastValidSvg,
+                };
+                isLoading.value = false;
+              }
+              // 无缓存时保持 loading 状态，不切换到代码模式
+            } else {
+              // 非流式：显示错误并切换到代码模式
+              renderResult.value = result;
+              isLoading.value = false;
+              mode.value = 'code';
+            }
+          }
+        };
+
+        if (props.streamStatus === 'loading') {
+          // 流式输入中：使用节流，只有当没有定时器时才设置新的
+          if (!renderTimer) {
+            renderTimer = setTimeout(() => {
+              renderTimer = null;
+              doRender();
+            }, STREAM_RENDER_DELAY);
+          }
+        } else {
+          // 流式完成或非流式：清除定时器并立即渲染
+          if (renderTimer) {
+            clearTimeout(renderTimer);
+            renderTimer = null;
+          }
+          doRender();
         }
       },
       { immediate: true }
@@ -313,7 +380,8 @@ export const MermaidBlock = defineComponent({
       } else {
         content = h('div', { class: 'md-mermaid-code' }, [
           h('pre', [h('code', { class: 'language-mermaid' }, props.code)]),
-          renderResult.value && !renderResult.value.success
+          // 错误提示 - 仅在非流式或流式完成时显示
+          renderResult.value && !renderResult.value.success && props.streamStatus === 'done'
             ? h('div', { class: 'md-mermaid-error' }, [
                 h('span', '渲染失败: '),
                 h('span', renderResult.value.error),
