@@ -18,6 +18,7 @@
 - **GFM 支持**：表格、任务列表、删除线、自动链接
 - **代码高亮**：内置 highlight.js，支持 190+ 语言
 - **数学公式**：内置 KaTeX，支持 LaTeX 语法
+- **Mermaid 图表**：支持流程图、时序图、类图等多种图表
 - **样式内置**：提供精心设计的默认样式
 
 ### 🔌 高度可扩展
@@ -158,6 +159,36 @@ console.log(greeting);
 </Markdown>
 ````
 
+## Mermaid 图表
+
+支持在 Markdown 中渲染 Mermaid 图表，包括流程图、时序图、类图等：
+
+````tsx
+<Markdown mermaid>
+```mermaid
+graph TD
+    A[开始] --> B{条件判断}
+    B -->|是| C[执行操作]
+    B -->|否| D[结束]
+    C --> D
+```
+</Markdown>
+````
+
+### 功能特性
+
+- **动态加载**：Mermaid 库按需加载，不影响首屏性能
+- **主题适配**：自动跟随浅色/暗色主题切换
+- **全屏查看**：支持浏览器原生全屏 API，沉浸式体验
+- **缩放平移**：鼠标滚轮缩放，拖拽平移
+- **PNG 下载**：一键导出高清 PNG 图片
+- **错误处理**：语法错误友好提示
+
+```tsx
+// 流式渲染
+<StreamingMarkdown content={content} mermaid />
+```
+
 ## 自定义组件
 
 覆盖默认 HTML 元素的渲染：
@@ -222,6 +253,7 @@ import remarkGemoji from 'remark-gemoji';
 | `gfm` | `boolean` | `true` | 启用 GFM 扩展 |
 | `highlight` | `boolean` | `true` | 启用代码高亮 |
 | `math` | `boolean` | `false` | 启用数学公式 |
+| `mermaid` | `boolean` | `false` | 启用 Mermaid 图表 |
 | `components` | `object` | `{}` | 自定义组件映射 |
 | `remarkPlugins` | `array` | `[]` | remark 插件列表 |
 | `rehypePlugins` | `array` | `[]` | rehype 插件列表 |
