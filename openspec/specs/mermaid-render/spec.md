@@ -128,54 +128,9 @@ TBD - created by archiving change add-mermaid-chart-render. Update Purpose after
 - **THEN** 系统 SHALL 显示全屏覆盖层
 - **AND** 覆盖层 SHALL 渲染到 body（使用 Portal）
 - **AND** 背景 SHALL 为半透明深色遮罩
+- **AND** 图表 SHALL 自动适配容器大小显示完整内容
 
-#### Scenario: 全屏模式工具栏
-
-- **GIVEN** 用户处于全屏模式
-- **WHEN** 查看界面
-- **THEN** 工具栏 SHALL 显示缩放控制按钮（+、-、重置、适应窗口）
-- **AND** 显示下载按钮
-- **AND** 显示关闭按钮
-
-#### Scenario: 全屏模式滚轮缩放
-
-- **GIVEN** 用户处于全屏模式
-- **WHEN** 用户使用鼠标滚轮（或触控板缩放手势）
-- **THEN** 图表 SHALL 以鼠标位置为中心进行缩放
-- **AND** 缩放 SHALL 有平滑过渡
-
-#### Scenario: 全屏模式拖拽平移
-
-- **GIVEN** 用户处于全屏模式
-- **WHEN** 用户按住鼠标左键并拖动
-- **THEN** 图表 SHALL 跟随鼠标移动
-- **AND** 鼠标光标 SHALL 变为抓取样式
-
-#### Scenario: 全屏模式双击重置
-
-- **GIVEN** 用户处于全屏模式，图表已被缩放或移动
-- **WHEN** 用户双击图表区域
-- **THEN** 图表 SHALL 重置到初始位置和缩放比例
-- **AND** 重置 SHALL 有平滑动画
-
-#### Scenario: 退出全屏模式
-
-- **GIVEN** 用户处于全屏模式
-- **WHEN** 用户点击关闭按钮、点击遮罩背景或按 ESC 键
-- **THEN** 全屏覆盖层 SHALL 关闭
-- **AND** 返回到普通视图
-
-#### Scenario: 全屏模式键盘支持
-
-- **GIVEN** 用户处于全屏模式
-- **WHEN** 用户按 +/= 键
-- **THEN** 图表 SHALL 放大
-- **WHEN** 用户按 - 键
-- **THEN** 图表 SHALL 缩小
-- **WHEN** 用户按 0 键
-- **THEN** 图表 SHALL 重置到初始状态
-
----
+> **变更说明**: 新增 "图表 SHALL 自动适配容器大小显示完整内容" 要求，进入全屏时默认执行适配操作而非固定 100% 缩放。
 
 ### Requirement: 图表下载功能
 

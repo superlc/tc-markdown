@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/@superlc/md-vue.svg)](https://www.npmjs.com/package/@superlc/md-vue)
 [![npm downloads](https://img.shields.io/npm/dm/@superlc/md-vue.svg)](https://www.npmjs.com/package/@superlc/md-vue)
 
-📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/nicepkg/react-md)**
+📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/superlc/tc-markdown/tree/main/packages/vue)**
 
 ## 功能特性
 
@@ -80,7 +80,7 @@ const isComplete = ref(false);
 async function fetchStream() {
   const response = await fetch('/api/chat');
   const reader = response.body.getReader();
-  
+
   while (true) {
     const { done, value } = await reader.read();
     if (done) {
@@ -93,11 +93,7 @@ async function fetchStream() {
 </script>
 
 <template>
-  <StreamingMarkdown
-    :content="content"
-    :is-complete="isComplete"
-    class="markdown-body"
-  />
+  <StreamingMarkdown :content="content" :is-complete="isComplete" class="markdown-body" />
 </template>
 ```
 
@@ -119,11 +115,7 @@ function handleComplete() {
 </script>
 
 <template>
-  <StreamingMarkdown
-    :source="fullContent"
-    output-rate="medium"
-    @complete="handleComplete"
-  />
+  <StreamingMarkdown :source="fullContent" output-rate="medium" @complete="handleComplete" />
 </template>
 ```
 
@@ -131,10 +123,7 @@ function handleComplete() {
 
 ```vue
 <template>
-  <StreamingMarkdown
-    :source="content"
-    :output-rate="{ charsPerSecond: 100, chunkSize: 5 }"
-  />
+  <StreamingMarkdown :source="content" :output-rate="{ charsPerSecond: 100, chunkSize: 5 }" />
 </template>
 ```
 
@@ -201,6 +190,7 @@ graph TD
 ```
 
 **Mermaid 功能特性：**
+
 - 动态加载：按需加载，不影响首屏性能
 - 主题适配：自动跟随浅色/暗色主题
 - 全屏查看：支持浏览器原生全屏 API
@@ -219,11 +209,15 @@ const CustomHeading = (props, { slots }) => {
 };
 
 const CustomLink = (props, { slots }) => {
-  return h('a', { 
-    href: props.href, 
-    target: '_blank',
-    rel: 'noopener' 
-  }, slots.default?.());
+  return h(
+    'a',
+    {
+      href: props.href,
+      target: '_blank',
+      rel: 'noopener',
+    },
+    slots.default?.()
+  );
 };
 
 const components = {
@@ -254,11 +248,7 @@ const content = ':rocket: # Hello';
 </script>
 
 <template>
-  <Markdown
-    :content="content"
-    :remark-plugins="remarkPlugins"
-    :rehype-plugins="rehypePlugins"
-  />
+  <Markdown :content="content" :remark-plugins="remarkPlugins" :rehype-plugins="rehypePlugins" />
 </template>
 ```
 
@@ -295,50 +285,47 @@ const { blocks, stats } = useStreamingMarkdown({
 
 ### Markdown 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `content` | `string` | - | Markdown 内容 |
-| `class` | `string` | - | 容器 CSS 类名 |
-| `gfm` | `boolean` | `true` | 启用 GFM 扩展 |
-| `highlight` | `boolean` | `true` | 启用代码高亮 |
-| `math` | `boolean` | `false` | 启用数学公式 |
-| `mermaid` | `boolean` | `false` | 启用 Mermaid 图表 |
-| `components` | `object` | `{}` | 自定义组件映射 |
-| `remarkPlugins` | `array` | `[]` | remark 插件列表 |
-| `rehypePlugins` | `array` | `[]` | rehype 插件列表 |
+| Prop            | 类型      | 默认值  | 描述              |
+| --------------- | --------- | ------- | ----------------- |
+| `content`       | `string`  | -       | Markdown 内容     |
+| `class`         | `string`  | -       | 容器 CSS 类名     |
+| `gfm`           | `boolean` | `true`  | 启用 GFM 扩展     |
+| `highlight`     | `boolean` | `true`  | 启用代码高亮      |
+| `math`          | `boolean` | `false` | 启用数学公式      |
+| `mermaid`       | `boolean` | `false` | 启用 Mermaid 图表 |
+| `components`    | `object`  | `{}`    | 自定义组件映射    |
+| `remarkPlugins` | `array`   | `[]`    | remark 插件列表   |
+| `rehypePlugins` | `array`   | `[]`    | rehype 插件列表   |
 
 ### StreamingMarkdown 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `content` | `string` | - | 受控模式内容 |
-| `source` | `string` | - | Source 模式完整内容 |
-| `isComplete` | `boolean` | `false` | 受控模式完成标记 |
-| `outputRate` | `string \| object` | `'medium'` | 输出速率 |
-| `minUpdateInterval` | `number` | `16` | 最小更新间隔(ms) |
+| Prop                | 类型               | 默认值     | 描述                |
+| ------------------- | ------------------ | ---------- | ------------------- |
+| `content`           | `string`           | -          | 受控模式内容        |
+| `source`            | `string`           | -          | Source 模式完整内容 |
+| `isComplete`        | `boolean`          | `false`    | 受控模式完成标记    |
+| `outputRate`        | `string \| object` | `'medium'` | 输出速率            |
+| `minUpdateInterval` | `number`           | `16`       | 最小更新间隔(ms)    |
 
 **Events:**
 
-| 事件 | 参数 | 描述 |
-|------|------|------|
-| `complete` | - | 渲染完成时触发 |
-| `block-stable` | `block: Block` | 块稳定时触发 |
-| `progress` | `progress: number` | 进度更新时触发 |
+| 事件           | 参数               | 描述           |
+| -------------- | ------------------ | -------------- |
+| `complete`     | -                  | 渲染完成时触发 |
+| `block-stable` | `block: Block`     | 块稳定时触发   |
+| `progress`     | `progress: number` | 进度更新时触发 |
 
 ### MermaidBlock 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `code` | `string` | - | Mermaid 图表代码 |
-| `streamStatus` | `'loading' \| 'done'` | `'done'` | 流式状态 |
+| Prop           | 类型                  | 默认值   | 描述             |
+| -------------- | --------------------- | -------- | ---------------- |
+| `code`         | `string`              | -        | Mermaid 图表代码 |
+| `streamStatus` | `'loading' \| 'done'` | `'done'` | 流式状态         |
 
 ### useMarkdown Composable
 
 ```typescript
-function useMarkdown(
-  content: Ref<string> | string,
-  options?: MarkdownOptions
-): ComputedRef<VNode>;
+function useMarkdown(content: Ref<string> | string, options?: MarkdownOptions): ComputedRef<VNode>;
 ```
 
 ### useStreamingMarkdown Composable
@@ -364,6 +351,7 @@ import '@superlc/md-vue/styles.css';
 ```
 
 样式包含：
+
 - 基础 Markdown 排版
 - 代码高亮主题（亮色/暗色自动切换）
 - 数学公式样式
@@ -379,9 +367,9 @@ import '@superlc/md-vue/styles.css';
 
 ## 相关包
 
-| 包 | 描述 |
-|---|---|
-| [@superlc/md-core](https://www.npmjs.com/package/@superlc/md-core) | 解析核心库 |
+| 包                                                                   | 描述           |
+| -------------------------------------------------------------------- | -------------- |
+| [@superlc/md-core](https://www.npmjs.com/package/@superlc/md-core)   | 解析核心库     |
 | [@superlc/md-react](https://www.npmjs.com/package/@superlc/md-react) | React 渲染组件 |
 
 ## License

@@ -98,6 +98,21 @@ export const MermaidFullscreenViewer = defineComponent({
       }
     };
 
+    // 全屏激活后自动适配容器
+    watch(isFullscreen, (fullscreen) => {
+      if (!fullscreen) return;
+      // 等待 DOM 布局完成后执行适配
+      requestAnimationFrame(() => {
+        if (!containerRef.value || !contentRef.value) return;
+        const containerRect = containerRef.value.getBoundingClientRect();
+        const svgEl = contentRef.value.querySelector('svg');
+        if (svgEl) {
+          const contentRect = svgEl.getBoundingClientRect();
+          fitToContainer(containerRect, contentRect);
+        }
+      });
+    });
+
     // 键盘事件
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isFullscreen.value) return;

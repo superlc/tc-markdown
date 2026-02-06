@@ -84,6 +84,21 @@ export const MermaidFullscreenViewer: React.FC<MermaidFullscreenViewerProps> = (
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [isFullscreen, onClose]);
 
+  // 全屏激活后自动适配容器
+  useEffect(() => {
+    if (!isFullscreen) return;
+    // 等待 DOM 布局完成后执行适配
+    requestAnimationFrame(() => {
+      if (!containerRef.current || !contentRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const svgEl = contentRef.current.querySelector('svg');
+      if (svgEl) {
+        const contentRect = svgEl.getBoundingClientRect();
+        fitToContainer(containerRect, contentRect);
+      }
+    });
+  }, [isFullscreen, fitToContainer]);
+
   // 键盘事件
   useEffect(() => {
     if (!isFullscreen) return;

@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/@superlc/md-core.svg)](https://www.npmjs.com/package/@superlc/md-core)
 [![npm downloads](https://img.shields.io/npm/dm/@superlc/md-core.svg)](https://www.npmjs.com/package/@superlc/md-core)
 
-📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/nicepkg/react-md)**
+📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/superlc/tc-markdown/tree/main/packages/core)**
 
 ## 功能特性
 
@@ -154,13 +154,13 @@ function createProcessor(options?: ParseOptions): Processor;
 
 ### ParseOptions
 
-| 选项 | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `gfm` | `boolean` | `true` | 启用 GitHub Flavored Markdown |
-| `highlight` | `boolean` | `true` | 启用代码语法高亮 |
-| `math` | `boolean` | `false` | 启用数学公式 (KaTeX) |
-| `remarkPlugins` | `PluginConfig[]` | `[]` | remark 插件列表 |
-| `rehypePlugins` | `PluginConfig[]` | `[]` | rehype 插件列表 |
+| 选项            | 类型             | 默认值  | 描述                          |
+| --------------- | ---------------- | ------- | ----------------------------- |
+| `gfm`           | `boolean`        | `true`  | 启用 GitHub Flavored Markdown |
+| `highlight`     | `boolean`        | `true`  | 启用代码语法高亮              |
+| `math`          | `boolean`        | `false` | 启用数学公式 (KaTeX)          |
+| `remarkPlugins` | `PluginConfig[]` | `[]`    | remark 插件列表               |
+| `rehypePlugins` | `PluginConfig[]` | `[]`    | rehype 插件列表               |
 
 ### PluginConfig
 
@@ -180,6 +180,7 @@ import '@superlc/md-core/styles.css';
 ```
 
 样式包含：
+
 - 基础 Markdown 排版样式
 - 代码高亮主题（亮色/暗色）
 - 数学公式样式
@@ -209,10 +210,10 @@ Markdown 文本
 
 ## 相关包
 
-| 包 | 描述 |
-|---|---|
+| 包                                                                   | 描述           |
+| -------------------------------------------------------------------- | -------------- |
 | [@superlc/md-react](https://www.npmjs.com/package/@superlc/md-react) | React 渲染组件 |
-| [@superlc/md-vue](https://www.npmjs.com/package/@superlc/md-vue) | Vue 3 渲染组件 |
+| [@superlc/md-vue](https://www.npmjs.com/package/@superlc/md-vue)     | Vue 3 渲染组件 |
 
 ## License
 

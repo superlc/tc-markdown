@@ -1,6 +1,6 @@
 {
   "name": "@superlc/md-core",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "基于 unified 的 Markdown 解析核心库",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/@superlc/md-react.svg)](https://www.npmjs.com/package/@superlc/md-react)
 [![npm downloads](https://img.shields.io/npm/dm/@superlc/md-react.svg)](https://www.npmjs.com/package/@superlc/md-react)
 
-📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/nicepkg/react-md)**
+📖 **[在线文档](http://43.163.201.189/md/latest/?path=/docs/%E7%AE%80%E4%BB%8B--docs)** | 🔗 **[GitHub](https://github.com/superlc/tc-markdown/tree/main/packages/react)**
 
 ## 功能特性
 
@@ -47,13 +47,7 @@ import { Markdown } from '@superlc/md-react';
 import '@superlc/md-react/styles.css';
 
 function App() {
-  return (
-    <Markdown className="markdown-body">
-      # Hello World
-      
-      This is **Markdown** content.
-    </Markdown>
-  );
+  return <Markdown className="markdown-body"># Hello World This is **Markdown** content.</Markdown>;
 }
 ```
 
@@ -67,13 +61,7 @@ function App() {
 import { StreamingMarkdown } from '@superlc/md-react';
 
 function ChatMessage({ content, isComplete }) {
-  return (
-    <StreamingMarkdown
-      content={content}
-      isComplete={isComplete}
-      className="markdown-body"
-    />
-  );
+  return <StreamingMarkdown content={content} isComplete={isComplete} className="markdown-body" />;
 }
 ```
 
@@ -88,7 +76,7 @@ function Demo() {
   return (
     <StreamingMarkdown
       source={fullContent}
-      outputRate="medium"  // 'slow' | 'medium' | 'fast' | 'instant'
+      outputRate="medium" // 'slow' | 'medium' | 'fast' | 'instant'
       onComplete={() => console.log('Done')}
     />
   );
@@ -112,7 +100,7 @@ function Demo() {
 ```tsx
 <Markdown math>
   行内公式：$E = mc^2$
-  
+
   块级公式：
   $$
   \int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
@@ -124,10 +112,7 @@ function Demo() {
 
 ````tsx
 <Markdown highlight>
-```javascript
-const greeting = 'Hello, World!';
-console.log(greeting);
-```
+  ```javascript const greeting = 'Hello, World!'; console.log(greeting); ```
 </Markdown>
 ````
 
@@ -148,6 +133,7 @@ graph TD
 ````
 
 **Mermaid 功能特性：**
+
 - 动态加载：按需加载，不影响首屏性能
 - 主题适配：自动跟随浅色/暗色主题
 - 全屏查看：支持浏览器原生全屏 API
@@ -180,12 +166,9 @@ graph TD
 import remarkEmoji from 'remark-emoji';
 import rehypeSlug from 'rehype-slug';
 
-<Markdown
-  remarkPlugins={[{ plugin: remarkEmoji }]}
-  rehypePlugins={[{ plugin: rehypeSlug }]}
->
+<Markdown remarkPlugins={[{ plugin: remarkEmoji }]} rehypePlugins={[{ plugin: rehypeSlug }]}>
   :rocket: # Hello
-</Markdown>
+</Markdown>;
 ```
 
 ### 使用 Hooks
@@ -206,10 +189,10 @@ function StreamingContent({ content, isComplete }) {
     isComplete,
     onComplete: () => console.log('Done'),
   });
-  
+
   return (
     <div className="markdown-body">
-      {blocks.map(block => (
+      {blocks.map((block) => (
         <div key={block.key}>{block.element}</div>
       ))}
     </div>
@@ -221,45 +204,42 @@ function StreamingContent({ content, isComplete }) {
 
 ### Markdown 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `children` | `string` | - | Markdown 内容 |
-| `className` | `string` | - | 容器 CSS 类名 |
-| `gfm` | `boolean` | `true` | 启用 GFM 扩展 |
-| `highlight` | `boolean` | `true` | 启用代码高亮 |
-| `math` | `boolean` | `false` | 启用数学公式 |
-| `mermaid` | `boolean` | `false` | 启用 Mermaid 图表 |
-| `components` | `object` | `{}` | 自定义组件映射 |
-| `remarkPlugins` | `array` | `[]` | remark 插件列表 |
-| `rehypePlugins` | `array` | `[]` | rehype 插件列表 |
+| Prop            | 类型      | 默认值  | 描述              |
+| --------------- | --------- | ------- | ----------------- |
+| `children`      | `string`  | -       | Markdown 内容     |
+| `className`     | `string`  | -       | 容器 CSS 类名     |
+| `gfm`           | `boolean` | `true`  | 启用 GFM 扩展     |
+| `highlight`     | `boolean` | `true`  | 启用代码高亮      |
+| `math`          | `boolean` | `false` | 启用数学公式      |
+| `mermaid`       | `boolean` | `false` | 启用 Mermaid 图表 |
+| `components`    | `object`  | `{}`    | 自定义组件映射    |
+| `remarkPlugins` | `array`   | `[]`    | remark 插件列表   |
+| `rehypePlugins` | `array`   | `[]`    | rehype 插件列表   |
 
 ### StreamingMarkdown 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `content` | `string` | - | 受控模式内容 |
-| `source` | `string` | - | Source 模式完整内容 |
-| `isComplete` | `boolean` | `false` | 受控模式完成标记 |
-| `outputRate` | `string \| object` | `'medium'` | 输出速率 |
-| `onComplete` | `function` | - | 完成回调 |
-| `onBlockStable` | `function` | - | 块稳定回调 |
-| `onProgress` | `function` | - | 进度回调 |
-| `minUpdateInterval` | `number` | `16` | 最小更新间隔(ms) |
+| Prop                | 类型               | 默认值     | 描述                |
+| ------------------- | ------------------ | ---------- | ------------------- |
+| `content`           | `string`           | -          | 受控模式内容        |
+| `source`            | `string`           | -          | Source 模式完整内容 |
+| `isComplete`        | `boolean`          | `false`    | 受控模式完成标记    |
+| `outputRate`        | `string \| object` | `'medium'` | 输出速率            |
+| `onComplete`        | `function`         | -          | 完成回调            |
+| `onBlockStable`     | `function`         | -          | 块稳定回调          |
+| `onProgress`        | `function`         | -          | 进度回调            |
+| `minUpdateInterval` | `number`           | `16`       | 最小更新间隔(ms)    |
 
 ### MermaidBlock 组件
 
-| Prop | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `code` | `string` | - | Mermaid 图表代码 |
-| `streamStatus` | `'loading' \| 'done'` | `'done'` | 流式状态 |
+| Prop           | 类型                  | 默认值   | 描述             |
+| -------------- | --------------------- | -------- | ---------------- |
+| `code`         | `string`              | -        | Mermaid 图表代码 |
+| `streamStatus` | `'loading' \| 'done'` | `'done'` | 流式状态         |
 
 ### useMarkdown Hook
 
 ```tsx
-function useMarkdown(
-  content: string,
-  options?: MarkdownOptions
-): React.ReactElement;
+function useMarkdown(content: string, options?: MarkdownOptions): React.ReactElement;
 ```
 
 ### useStreamingMarkdown Hook
@@ -285,6 +265,7 @@ import '@superlc/md-react/styles.css';
 ```
 
 样式包含：
+
 - 基础 Markdown 排版
 - 代码高亮主题（亮色/暗色自动切换）
 - 数学公式样式
@@ -300,10 +281,10 @@ import '@superlc/md-react/styles.css';
 
 ## 相关包
 
-| 包 | 描述 |
-|---|---|
-| [@superlc/md-core](https://www.npmjs.com/package/@superlc/md-core) | 解析核心库 |
-| [@superlc/md-vue](https://www.npmjs.com/package/@superlc/md-vue) | Vue 3 渲染组件 |
+| 包                                                                 | 描述           |
+| ------------------------------------------------------------------ | -------------- |
+| [@superlc/md-core](https://www.npmjs.com/package/@superlc/md-core) | 解析核心库     |
+| [@superlc/md-vue](https://www.npmjs.com/package/@superlc/md-vue)   | Vue 3 渲染组件 |
 
 ## License
 
