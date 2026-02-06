@@ -1,6 +1,6 @@
 {
   "name": "@superlc/md-vue",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "基于 @superlc/md-core 的 Vue 3 Markdown 渲染组件",
   "type": "module",
   "main": "./dist/index.cjs",
